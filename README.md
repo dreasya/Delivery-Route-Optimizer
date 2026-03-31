@@ -1,4 +1,4 @@
-# 🚚 Tobeez Route Planner
+# Tobeez Route Planner
 
 > **Internal logistics tool built for [Tobeez](https://github.com/yourusername) — a last-mile FMCG distribution startup operating in the Casablanca region.**
 
@@ -35,36 +35,36 @@ Planning time dropped from ~50 minutes to **under 5 minutes**.
 
 ## Features
 
-### 📂 Data Import
+### Data Import
 - Drag-and-drop `.xlsx` upload or paste directly from Excel
 - **Custom XLSX parser** — no SheetJS dependency. Implements zip decompression (`inflate`), XML parsing, and shared string resolution from scratch
 - **RFC 4180 CSV parser** — handles quoted commas, Arabic text, BOM headers, TSV/CSV auto-detection
 - Smart column aliasing: maps `"Matrix Order ID"`, `"Customer/City"`, `"X"`, `"Y"` etc. automatically
 
-### 🗺️ Interactive Map
+### Interactive Map
 - **Offline vector basemap** — rendered on HTML5 Canvas from embedded geographic data. Works with no internet connection, no tile server, no API keys
 - 15 delivery zones covering Greater Casablanca, all defined as real GPS polygons from order density clustering
 - Point-in-polygon sector detection (ray-casting algorithm) assigns each order to its zone automatically
 - Pan, zoom, hover tooltips, click-to-focus on any stop
 
-### ⚡ Route Optimization
+### Route Optimization
 - **Nearest Neighbor** seeding — greedy algorithm builds an initial route in O(n²)
 - **2-opt improvement** — iteratively reverses route segments until no improvement is found, typically reducing distance by 5–10% over NN alone
 - Home-bias on final stops: weights the last 3 stops toward the agent's home address to minimize return trip
 - Supports up to 35 stops (van capacity guardrail at 30)
 
-### 📋 Order Confirmation Workflow
+### Order Confirmation Workflow
 - Every order has a ✓/✗ toggle — confirmed orders route, deferred ones are skipped
 - Corridor cards show confirmed vs deferred counts in real time
 - Deferred orders remain visible (struck through) so nothing gets lost
 
-### 📤 Route Card Export
+### Route Card Export
 - Downloads a standalone `.html` file — printable, shareable via WhatsApp
 - **Segmented Google Maps links**: Google Maps allows max 10 waypoints per URL, so routes are automatically split into Part 1 / Part 2 / Part 3, each ending where the next begins
 - Each stop row shows its segment badge (P1/P2/P3), individual Maps navigation link, order numbers, and value
 - Supports up to 35 stops across 4 links
 
-### 📊 Session Metrics
+### Session Metrics
 - Every planned route is recorded: date, stops, km, duration estimate, MAD value, planning time
 - KPI dashboard: avg km/day, avg stops, avg planning time
 - CSV export for analysis
@@ -201,4 +201,4 @@ MIT — free to use, adapt, and build on.
 
 ---
 
-*Built by [Your Name](https://github.com/yourusername) · Product & Ops Lead @ Tobeez · Casablanca, Morocco*
+*Built by [Mohamed Amin OUARGUI](https://github.com/dreasy) · Product & Ops Lead @ Tobeez · Berrechid, Morocco*
