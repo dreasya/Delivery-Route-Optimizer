@@ -140,7 +140,7 @@ delivery-route-planner.html          ← entire app in one file (~90KB)
 ## How to Use
 
 ### Option A — Live Demo
-→ [yourusername.github.io/Confidential*-route-planner](https://yourusername.github.io/Confidential*-route-planner)
+→ [dreasy.github.io/delivery-route-planner](https://dreasy.github.io/delivery-route-planner)
 
 ### Option B — Run Locally
 ```bash
