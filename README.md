@@ -142,13 +142,13 @@ delivery-route-planner.html          ← entire app in one file (~90KB)
 ### Option B — Run Locally
 ```bash
 # No install, no build step, no server needed
-git clone https://github.com/yourusername/Confidential*-route-planner
-open Confidential*_planner.html   # or just double-click it
+git clone https://github.com/dreasya/delivery-route-planner
+open delivery_planner.html   # or just double-click it
 ```
 
 ### Daily Workflow
 ```
-1. Open Confidential*_planner.html
+1. Open delivery_planner.html
 2. Upload Odoo export (.xlsx or .csv)
 3. Set date filter → Apply
 4. Toggle ✓/✗ on orders (confirm / defer)
