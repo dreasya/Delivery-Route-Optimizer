@@ -1,6 +1,6 @@
 # Confidential* Route Planner
 
-> **Internal logistics tool built for [Confidential](https://github.com/dreasy) — a last-mile FMCG distribution startup operating in the Casablanca region.**
+> **Internal logistics tool built for [Confidential*](https://github.com/dreasy) — a last-mile FMCG distribution startup operating in the Casablanca region.**
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=flat-square&logo=github)](https://dreasy.github.io/Confidential*-route-planner)
 [![Built With](https://img.shields.io/badge/Built%20With-Vanilla%20JS-yellow?style=flat-square)]()
