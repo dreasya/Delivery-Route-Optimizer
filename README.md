@@ -3,9 +3,6 @@
 > **Internal logistics tool built for [Confidential*](https://github.com/dreasy) — a last-mile FMCG distribution startup operating in the Casablanca region.**
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=flat-square&logo=github)]([https://dreasy.github.io/delivery-route-planner](https://github.com/dreasya/Delivery-Route-Optimizer/blob/main/delivery-route-planner.html))
-[![Built With](https://img.shields.io/badge/Built%20With-Vanilla%20JS-yellow?style=flat-square)]()
-[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green?style=flat-square)]()
-[![Single File](https://img.shields.io/badge/App-Single%20HTML%20File-orange?style=flat-square)]()
 
 ---
 
