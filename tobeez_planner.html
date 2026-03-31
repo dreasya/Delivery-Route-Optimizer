@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tobeez — Route Planner</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+:root {
+  --bg:#0f1117;--surface:#181b23;--s2:#1f2330;--border:#2a2e3d;
+  --accent:#f0a500;--text:#e8e6e0;--muted:#6b7280;
+  --green:#2ecc71;--red:#e74c3c;--blue:#4a9eff;--orange:#f39c12;--purple:#9b59b6;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+header{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;gap:10px;flex-wrap:wrap;}
+.logo{font-family:"Space Mono",monospace;font-size:15px;font-weight:700;letter-spacing:3px;color:var(--accent);white-space:nowrap;}
+.logo span{color:var(--muted);font-weight:400;font-size:10px;margin-left:6px;letter-spacing:1px;}
+.hright{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.btn{padding:6px 14px;border-radius:6px;border:none;font-family:"Space Mono",monospace;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .15s;text-transform:uppercase;white-space:nowrap;}
+.btn-p{background:var(--accent);color:#000;}.btn-p:hover{background:#ffc040;}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border);}.btn-g:hover{border-color:var(--accent);color:var(--accent);}
+.btn-success{background:var(--green);color:#000;}.btn-success:hover{filter:brightness(1.1);}
+.upload-wrap{position:relative;}.upload-wrap input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+.filterbar{display:flex;align-items:center;gap:10px;padding:8px 18px;background:var(--s2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+.flabel{font-family:"Space Mono",monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+input[type=date],input[type=time]{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:5px 9px;border-radius:5px;font-size:12px;outline:none;cursor:pointer;font-family:"DM Sans",sans-serif;}
+input[type=date]:hover,input[type=time]:hover{border-color:var(--accent);}
+.sep{color:var(--muted);font-size:11px;}
+.stats{display:flex;gap:1px;background:var(--border);border-bottom:1px solid var(--border);flex-shrink:0;}
+.stat{flex:1;padding:7px 12px;background:var(--surface);}
+.sv{font-family:"Space Mono",monospace;font-size:16px;font-weight:700;color:var(--accent);}
+.sl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+.main{display:flex;flex:1;overflow:hidden;}
+.sidebar{width:300px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+.tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.tab{flex:1;padding:8px;font-family:"Space Mono",monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;text-align:center;cursor:pointer;color:var(--muted);border:none;border-bottom:2px solid transparent;background:none;transition:all .2s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tabpane{display:none;flex:1;overflow-y:auto;flex-direction:column;}
+.tabpane.active{display:flex;}
+.sec-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sec-title{font-family:"Space Mono",monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.sal-btn{font-size:10px;color:var(--accent);cursor:pointer;font-family:"Space Mono",monospace;background:none;border:none;}
+.sal-btn:hover{text-decoration:underline;}
+.clist{padding:8px;display:flex;flex-direction:column;gap:4px;flex:1;}
+.citem{border-radius:7px;background:var(--s2);border:1px solid var(--border);cursor:pointer;transition:all .15s;overflow:hidden;}
+.citem:hover{border-color:var(--accent);}
+.citem.selected{border-color:var(--accent);background:#f0a50010;}
+.citem-hdr{display:flex;align-items:center;gap:8px;padding:9px 10px;}
+.cchk{width:16px;height:16px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.citem.selected .cchk{background:var(--accent);border-color:var(--accent);}
+.cchk-m{color:#000;font-size:10px;font-weight:700;display:none;}
+.citem.selected .cchk-m{display:block;}
+.cdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.cname{flex:1;font-size:12px;font-weight:500;}
+.cbadge{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);background:var(--bg);padding:2px 6px;border-radius:8px;}
+.cexp{font-size:12px;color:var(--muted);padding:2px 6px;background:none;border:none;cursor:pointer;transition:transform .2s;line-height:1;}
+.cexp.open{transform:rotate(180deg);}
+.cdet{display:none;border-top:1px solid var(--border);padding:0 8px 8px;max-height:240px;overflow-y:auto;}
+.cdet.open{display:block;}
+.cdet-title{font-family:"Space Mono",monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:6px 2px 4px;}
+.cdet-cols{display:flex;gap:4px;padding:2px 6px 5px;font-size:9px;color:var(--muted);font-family:"Space Mono",monospace;border-bottom:1px solid var(--border);margin-bottom:4px;}
+.orow{display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:4px;font-size:11px;}
+.orow:hover{background:var(--bg);}
+.o-id{font-family:"Space Mono",monospace;font-size:9px;color:var(--muted);width:75px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.o-nm{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.o-ct{font-size:10px;color:var(--muted);width:65px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.o-vl{font-family:"Space Mono",monospace;font-size:10px;color:var(--accent);width:52px;text-align:right;flex-shrink:0;}
+.cdet-sum{display:flex;justify-content:space-between;padding:5px 6px;border-top:1px solid var(--border);margin-top:4px;font-size:10px;color:var(--muted);}
+.cdet-sum strong{font-family:"Space Mono",monospace;color:var(--accent);}
+.cap-warn{margin:6px 8px 0;padding:6px 10px;background:#e74c3c15;border:1px solid #e74c3c55;border-radius:5px;font-size:10px;color:var(--red);font-family:"Space Mono",monospace;}
+.rhead{padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.rhead-title{font-family:"Space Mono",monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.rstops{padding:6px;flex:1;overflow-y:auto;}
+.scard{display:flex;align-items:center;gap:7px;padding:8px 9px;margin-bottom:3px;border-radius:6px;background:var(--s2);border:1px solid var(--border);cursor:pointer;transition:all .15s;}
+.scard:hover{border-color:var(--accent);transform:translateX(2px);}
+.scard.hl{border-color:var(--accent);background:#f0a50012;}
+.snum{font-family:"Space Mono",monospace;font-size:10px;font-weight:700;width:22px;height:22px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.si{flex:1;min-width:0;}
+.sn{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sm{font-size:10px;color:var(--muted);margin-top:1px;}
+.scorr{font-size:9px;padding:1px 5px;border-radius:3px;font-family:"Space Mono",monospace;flex-shrink:0;}
+.obar{padding:8px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;}
+.obar .btn{flex:1;font-size:9px;}
+.mapwrap{flex:1;position:relative;overflow:hidden;}
+#mapCanvas{width:100%;height:100%;display:block;cursor:grab;}
+#mapCanvas:active{cursor:grabbing;}
+#tooltip{position:absolute;pointer-events:none;display:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:11px;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.6);min-width:180px;}
+.tt-name{font-family:"Space Mono",monospace;font-size:11px;color:var(--accent);font-weight:700;margin-bottom:5px;}
+.tt-row{color:var(--muted);margin-top:2px;}.tt-row strong{color:var(--text);}
+#routePanel{position:absolute;bottom:14px;right:14px;display:none;background:rgba(24,27,35,0.95);border:1px solid var(--border);border-radius:9px;padding:12px 16px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.6);min-width:205px;backdrop-filter:blur(6px);}
+#routePanel h4{font-family:"Space Mono",monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.rstat{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.rsl{font-size:11px;color:var(--muted);}
+.rsv{font-family:"Space Mono",monospace;font-size:12px;color:var(--accent);font-weight:700;}
+.rdiv{border-top:1px solid var(--border);margin:7px 0;}
+.home-row .rsl{color:var(--green);}.home-row .rsv{color:var(--green);}
+#legend{position:absolute;top:10px;right:10px;background:rgba(24,27,35,0.92);border:1px solid var(--border);border-radius:7px;padding:9px 12px;z-index:50;backdrop-filter:blur(4px);}
+#legend h5{font-family:"Space Mono",monospace;font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:10px;margin-bottom:3px;}
+.ldot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+#mapCtrl{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:3px;z-index:50;}
+.mc{width:32px;height:32px;background:rgba(24,27,35,0.92);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;backdrop-filter:blur(4px);}
+.mc:hover{border-color:var(--accent);color:var(--accent);}
+.schedbar{position:absolute;bottom:14px;left:10px;background:rgba(24,27,35,0.92);border:1px solid var(--border);border-radius:7px;padding:8px 12px;z-index:50;font-size:10px;line-height:1.8;backdrop-filter:blur(4px);display:none;}
+.schedbar .sh{font-family:"Space Mono",monospace;font-size:8px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:1px;}
+.srow{display:flex;align-items:center;gap:7px;}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+#splash{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(13,17,23,0.93);z-index:200;backdrop-filter:blur(6px);}
+.splash-box{background:var(--surface);border:2px dashed var(--border);border-radius:16px;padding:36px 48px;text-align:center;max-width:420px;transition:border-color .2s;}
+.splash-box.drag-over{border-color:var(--accent);}
+.splash-ico{font-size:44px;margin-bottom:14px;}
+.splash-title{font-family:"Space Mono",monospace;font-size:15px;font-weight:700;color:var(--accent);margin-bottom:8px;letter-spacing:2px;}
+.splash-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.splash-cols{font-family:"Space Mono",monospace;font-size:10px;color:var(--muted);background:var(--bg);padding:10px 14px;border-radius:6px;margin-bottom:20px;text-align:left;line-height:2.1;}
+.splash-upload{position:relative;display:inline-block;}
+.splash-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;color:var(--muted);}
+.eico{font-size:32px;margin-bottom:10px;opacity:.5;}
+.empty p{font-size:11px;line-height:1.6;}
+#osm-credit{position:absolute;bottom:4px;right:8px;font-size:9px;color:rgba(255,255,255,0.3);z-index:40;pointer-events:none;}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--s2);border:1px solid var(--accent);color:var(--text);padding:8px 18px;border-radius:6px;font-size:12px;z-index:9999;transition:transform .25s;pointer-events:none;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ORDER CONFIRMATION TOGGLE */
+.orow { cursor:pointer; position:relative; }
+.orow.deferred { opacity:0.38; text-decoration:line-through; }
+.orow.deferred .o-confirm { background:#e74c3c22; border-color:#e74c3c; color:#e74c3c; }
+.o-confirm {
+  width:18px; height:18px; border-radius:4px; border:1.5px solid var(--border);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  font-size:9px; font-weight:700; background:var(--green); color:#000;
+  cursor:pointer; transition:all .15s; user-select:none;
+}
+.orow.deferred .o-status { color:#e74c3c; }
+.o-status { font-size:9px; color:var(--green); font-family:"Space Mono",monospace; width:36px; flex-shrink:0; }
+
+/* METRICS PANEL */
+#metricsPanel {
+  position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:500;
+  display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px);
+}
+#metricsPanel.open { display:flex; }
+.metrics-box {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  width:min(820px,95vw); max-height:85vh; display:flex; flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.metrics-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.metrics-hdr h2 { font-family:"Space Mono",monospace; font-size:13px; color:var(--accent); letter-spacing:2px; text-transform:uppercase; }
+.metrics-body { padding:16px 20px; overflow-y:auto; flex:1; }
+.metrics-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
+.kpi { background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+.kpi-v { font-family:"Space Mono",monospace; font-size:20px; font-weight:700; color:var(--accent); }
+.kpi-l { font-size:10px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:.5px; }
+.metrics-table-wrap { overflow-x:auto; }
+.metrics-table { width:100%; border-collapse:collapse; font-size:11px; }
+.metrics-table th { background:var(--s2); padding:7px 10px; text-align:left; font-family:"Space Mono",monospace; font-size:9px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap; }
+.metrics-table td { padding:7px 10px; border-bottom:1px solid var(--border); color:var(--text); white-space:nowrap; }
+.metrics-table tr:hover td { background:var(--s2); }
+.metrics-table .good { color:var(--green); font-weight:600; }
+.metrics-table .num { font-family:"Space Mono",monospace; }
+.metrics-foot { display:flex; gap:8px; padding:12px 20px; border-top:1px solid var(--border); flex-shrink:0; }
+.metrics-foot .btn { font-size:10px; }
+.no-data { text-align:center; padding:40px; color:var(--muted); font-size:12px; }
+
+/* CONFIRM BADGE on corridor header */
+.cconf-badge { font-size:9px; font-family:"Space Mono",monospace; padding:1px 6px; border-radius:8px; margin-left:2px; }
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">TOBEEZ <span>Route Planner</span></div>
+  <div class="hright">
+    <button class="btn btn-success" id="optBtn" style="display:none" onclick="optimizeAll()">&#9889; Optimize Selected</button>
+    <button class="btn btn-g" onclick="openMetrics()">&#128200; Metrics</button>
+    <button class="btn btn-g" onclick="exportCard()">&#8595; Route Card</button>
+    <div class="upload-wrap">
+      <button class="btn btn-g">&#8593; New Import</button>
+      <input type="file" accept=".xlsx,.csv" onchange="importFile(event)">
+    </div>
+  </div>
+</header>
+
+<div class="filterbar">
+  <span class="flabel">From</span>
+  <input type="date" id="dateFrom">
+  <input type="time" id="timeFrom" value="00:00">
+  <span class="sep">&#8594;</span>
+  <input type="date" id="dateTo">
+  <input type="time" id="timeTo" value="23:59">
+  <button class="btn btn-p" onclick="loadRange()">&#9654; Apply</button>
+  <span class="sep" style="margin:0 4px">|</span>
+  <span class="flabel">Quick</span>
+  <button class="btn btn-g" onclick="setQuick('today')">Today</button>
+  <button class="btn btn-g" onclick="setQuick('tomorrow')">Tomorrow</button>
+  <button class="btn btn-g" onclick="setQuick('week')">This Week</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="sv" id="sv-orders">&#8212;</div><div class="sl">Orders</div></div>
+  <div class="stat"><div class="sv" id="sv-stops">&#8212;</div><div class="sl">Stops</div></div>
+  <div class="stat"><div class="sv" id="sv-value">&#8212;</div><div class="sl">Value MAD</div></div>
+  <div class="stat"><div class="sv" id="sv-dist">&#8212;</div><div class="sl">Route KM</div></div>
+  <div class="stat"><div class="sv" id="sv-eta">&#8212;</div><div class="sl">ETA Home</div></div>
+  <div class="stat"><div class="sv" id="sv-sel">0</div><div class="sl">Selected</div></div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('corridors',this)">Corridors</button>
+      <button class="tab" onclick="switchTab('route',this)">Route</button>
+    </div>
+    <div class="tabpane active" id="tab-corridors">
+      <div class="sec-head">
+        <span class="sec-title" id="clist-label">No data loaded</span>
+        <button class="sal-btn" onclick="toggleSelectAll()">Select All</button>
+      </div>
+      <div class="clist" id="clist">
+        <div class="empty"><div class="eico">&#128194;</div><p>Upload your Tobeez Excel file<br>to get started</p></div>
+      </div>
+    </div>
+    <div class="tabpane" id="tab-route">
+      <div class="rhead"><span class="rhead-title" id="rhead-label">No route yet</span></div>
+      <div id="capwarn" class="cap-warn" style="display:none"></div>
+      <div class="rstops" id="rstops">
+        <div class="empty"><div class="eico">&#128205;</div><p>Select corridors and click<br><strong>Optimize Selected</strong></p></div>
+      </div>
+      <div class="obar">
+        <button class="btn btn-p" onclick="optimizeAll()">&#9889; Optimize</button>
+        <button class="btn btn-g" onclick="clearAll()">&#10005; Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mapwrap">
+    <canvas id="mapCanvas"></canvas>
+
+    <div id="splash">
+      <div class="splash-box" id="splashBox" style="max-width:480px;">
+        <div class="splash-ico">&#128506;</div>
+        <div class="splash-title">TOBEEZ ROUTE PLANNER</div>
+        <div class="splash-sub">Upload your daily Excel export or paste data directly</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div class="splash-upload" style="flex:1">
+            <button class="btn btn-p" style="font-size:11px;padding:9px 0;width:100%">&#128194; Upload .xlsx / .csv</button>
+            <input type="file" accept=".xlsx,.xls,.csv,.tsv" onchange="importFile(event)">
+          </div>
+          <button class="btn btn-g" style="flex:1;font-size:11px;padding:9px 0" onclick="showPaste()">&#128203; Paste from Excel</button>
+        </div>
+        <div id="pasteArea" style="display:none;margin-bottom:12px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;font-family:Space Mono,monospace;">PASTE YOUR EXCEL DATA BELOW (Ctrl+A, Ctrl+C from Excel, then Ctrl+V here)</div>
+          <textarea id="pasteBox" style="width:100%;height:100px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;font-size:11px;font-family:monospace;resize:vertical" placeholder="Paste Excel rows here..."></textarea>
+          <button class="btn btn-p" style="width:100%;margin-top:6px;font-size:11px" onclick="parsePaste()">&#9654; Load Pasted Data</button>
+        </div>
+        <div id="debugLog" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:10px;font-family:monospace;color:#aaa;max-height:120px;overflow-y:auto;text-align:left;margin-bottom:10px;"></div>
+        <div class="splash-cols" style="margin-bottom:0;">
+          Expected columns:<br>
+          <span style="color:var(--accent)">Matrix Order ID</span> &middot; Creation Date &middot; Customer<br>
+          Total &middot; Customer/City &middot; <span style="color:var(--accent)">X</span> &middot; <span style="color:var(--accent)">Y</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="mapCtrl">
+      <button class="mc" onclick="zoomIn()">+</button>
+      <button class="mc" onclick="zoomOut()">&#8722;</button>
+      <button class="mc" onclick="resetView()">&#8962;</button>
+    </div>
+
+    <div id="legend">
+      <h5>Sectors</h5>
+      <div class="leg-item"><div class="ldot" style="background:#e74c3c"></div>Central Core</div>
+      <div class="leg-item"><div class="ldot" style="background:#e67e22"></div>East Industrial</div>
+      <div class="leg-item"><div class="ldot" style="background:#f1c40f"></div>South-East Belt</div>
+      <div class="leg-item"><div class="ldot" style="background:#3498db"></div>West Coastal</div>
+      <div class="leg-item"><div class="ldot" style="background:#2ecc71"></div>NW Residential</div>
+      <div class="leg-item"><div class="ldot" style="background:#9b59b6"></div>Peripheral Ring</div>
+      <div class="leg-item"><div class="ldot" style="background:#1abc9c"></div>Mohammedia</div>
+      <div class="leg-item"><div class="ldot" style="background:#f0a500"></div>Berrechid / HUB</div>
+      <div class="leg-item"><div class="ldot" style="background:#e74c3c"></div>Settat</div>
+      <div class="leg-item"><div class="ldot" style="background:#7f8c8d"></div>Other</div>
+      <div class="leg-item"><div class="ldot" style="background:#f0a500;border:2px solid rgba(255,255,255,.5)"></div>HUB Point ★</div>
+      <div class="leg-item"><div class="ldot" style="background:#2ecc71;border:2px solid rgba(255,255,255,.5)"></div>Agent Home 🏠</div>
+    </div>
+
+    <div id="tooltip">
+      <div class="tt-name" id="tt-name"></div>
+      <div class="tt-row" id="tt-city"></div>
+      <div class="tt-row" id="tt-corr"></div>
+      <div class="tt-row" id="tt-orders"></div>
+      <div class="tt-row" id="tt-value"></div>
+    </div>
+
+    <div id="routePanel">
+      <h4>Route Summary</h4>
+      <div class="rstat"><span class="rsl">Corridors</span><span class="rsv" id="rp-corr">&#8212;</span></div>
+      <div class="rstat"><span class="rsl">Total Stops</span><span class="rsv" id="rp-stops">&#8212;</span></div>
+      <div class="rstat"><span class="rsl">Distance</span><span class="rsv" id="rp-dist">&#8212;</span></div>
+      <div class="rstat"><span class="rsl">Duration</span><span class="rsv" id="rp-time">&#8212;</span></div>
+      <div class="rstat"><span class="rsl">Total Value</span><span class="rsv" id="rp-value">&#8212;</span></div>
+      <div class="rdiv"></div>
+      <div class="rstat"><span class="rsl">&#128640; Depart HUB</span><span class="rsv">07:30</span></div>
+      <div class="rstat home-row"><span class="rsl">&#127968; ETA Bouskoura</span><span class="rsv" id="rp-eta">&#8212;</span></div>
+      <div class="rstat home-row"><span class="rsl">&#128205; Last&#8594;Home</span><span class="rsv" id="rp-homedist">&#8212;</span></div>
+    </div>
+
+    <div class="schedbar" id="schedbar">
+      <div class="sh">Daily Schedule</div>
+      <div class="srow"><div class="sdot" style="background:#f0a500"></div>07:30 &#8212; Load at Berrechid HUB</div>
+      <div class="srow"><div class="sdot" style="background:#4a9eff"></div>08:00 &#8212; Est. first delivery</div>
+      <div class="srow" id="sched-eta"><div class="sdot" style="background:#2ecc71"></div>&#8212; ETA home Bouskoura</div>
+    </div>
+
+    <div id="osm-credit">&#169; OpenStreetMap contributors &#169; CARTO</div>
+  </div>
+</div>
+
+
+<!-- METRICS PANEL -->
+<div id="metricsPanel">
+  <div class="metrics-box">
+    <div class="metrics-hdr">
+      <h2>&#128200; Ops Metrics</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-g" onclick="exportMetrics()">&#8595; Export CSV</button>
+        <button class="btn btn-g" onclick="closeMetrics()">&#10005;</button>
+      </div>
+    </div>
+    <div class="metrics-body">
+      <div class="metrics-kpis" id="metricsKpis"></div>
+      <div class="metrics-table-wrap">
+        <table class="metrics-table">
+          <thead><tr>
+            <th>Date</th><th>Corridors</th><th>Stops</th>
+            <th>Est. KM</th><th>Est. Duration</th><th>Total Value</th>
+            <th>Confirmed</th><th>Deferred</th><th>Planning Time</th>
+          </tr></thead>
+          <tbody id="metricsBody"></tbody>
+        </table>
+        <div class="no-data" id="metricsEmpty" style="display:none">No sessions recorded yet. Export a route card to start tracking.</div>
+      </div>
+    </div>
+    <div class="metrics-foot">
+      <button class="btn btn-g" style="color:#e74c3c;border-color:#e74c3c44" onclick="clearMetrics()">&#128465; Clear All Data</button>
+      <span style="flex:1"></span>
+      <button class="btn btn-p" onclick="closeMetrics()">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const HUB        = { lat:33.250834, lng:-7.622339 };
+const AGENT_HOME = { lat:33.4603, lng:-7.6466 };
+const DEPART_H   = 7.5; // 07:30
+
+// ── SECTOR DEFINITIONS ────────────────────────────────────────────────────────
+// Each sector has a polygon (array of [lat,lng] vertices) drawn on the map.
+// getCorridor() uses point-in-polygon to assign orders to sectors.
+// Named cities (Settat, Mohammedia, Berrechid) are caught by coordinate proximity first.
+
+const CORRIDORS = {
+  central: {
+    name:  "Central Core",
+    color: "#e74c3c",
+    // Maarif–Racine–Gauthier–Bourgogne–Zerktouni
+    // N: Bd d'Anfa, S: Rte d'El Jadida, E: Bd Mohammed V, W: Corniche
+    poly: [
+      [33.5950, -7.6380], // NW – Bd Anfa / Corniche area
+      [33.5980, -7.6200], // NE – Bd Anfa / Bd Mohammed V
+      [33.5820, -7.5950], // E  – Bd Mohammed V south
+      [33.5700, -7.6000], // SE – Rte El Jadida / east
+      [33.5700, -7.6200], // S  – Rte El Jadida middle
+      [33.5720, -7.6380], // SW – Rte El Jadida / Corniche
+      [33.5850, -7.6480], // W  – Corniche mid
+    ]
+  },
+  east_industrial: {
+    name:  "East Industrial",
+    color: "#e67e22",
+    // Ain Sebaa, Sidi Bernoussi, Zenata, Port area
+    poly: [
+      [33.6050, -7.5950], // Port / north
+      [33.6200, -7.5600], // NE coast
+      [33.6400, -7.5200], // Zenata north
+      [33.6200, -7.4800], // Far east
+      [33.5900, -7.4900], // Bernoussi south
+      [33.5700, -7.5300], // SW cut
+      [33.5820, -7.5950], // West boundary (meets Central E edge)
+    ]
+  },
+  south_east: {
+    name:  "South-East Belt",
+    color: "#f1c40f",
+    // Sidi Maarouf, Lissasfa, Oulfa, Hay Hassani
+    // From Rte El Jadida southward
+    poly: [
+      [33.5700, -7.6000], // N – Rte El Jadida east
+      [33.5700, -7.6200], // N – Rte El Jadida middle
+      [33.5500, -7.6200], // W mid
+      [33.5300, -7.6100], // SW
+      [33.5200, -7.5800], // S
+      [33.5200, -7.5400], // SE
+      [33.5500, -7.5200], // E
+      [33.5700, -7.5300], // NE
+      [33.5820, -7.5950], // North boundary
+    ]
+  },
+  west_coastal: {
+    name:  "West Coastal",
+    color: "#3498db",
+    // Anfa, Ain Diab, California
+    // Corniche southward to Dar Bouazza split
+    poly: [
+      [33.5850, -7.6480], // N – Corniche top (meets Central W)
+      [33.5720, -7.6380], // NE – meeting Central SW
+      [33.5700, -7.6200], // SE – Rte El Jadida
+      [33.5500, -7.6200], // E mid
+      [33.5300, -7.6600], // S – before Dar Bouazza
+      [33.5500, -7.6900], // SW coastal
+      [33.5700, -7.6900], // W coastal mid
+      [33.5900, -7.6700], // NW – Ain Diab
+    ]
+  },
+  north_west: {
+    name:  "NW Residential",
+    color: "#2ecc71",
+    // Hay Mohammadi, Derb Sultan, Sbata, Mers Sultan
+    // Between Central Core and Industrial zone, north of city center
+    poly: [
+      [33.5980, -7.6200], // S – Bd Anfa / Bd Mohammed V (meets Central NE)
+      [33.6050, -7.5950], // SE – meets Industrial W
+      [33.6300, -7.5800], // E
+      [33.6500, -7.6000], // NE
+      [33.6500, -7.6400], // N
+      [33.6300, -7.6500], // NW
+      [33.6100, -7.6400], // W
+      [33.5980, -7.6380], // SW – meets Central NW
+      [33.5980, -7.6200], // close
+    ]
+  },
+  peripheral: {
+    name:  "Peripheral Ring",
+    color: "#9b59b6",
+    // Dar Bouazza, Tamaris, Bouskoura, Nouaceur – outside main ring
+    poly: [
+      [33.5300, -7.6600], // N – above Dar Bouazza (meets West Coastal S)
+      [33.5500, -7.6200], // NE
+      [33.5200, -7.5800], // E
+      [33.4800, -7.5600], // SE – Bouskoura
+      [33.4400, -7.5800], // S – Nouaceur
+      [33.4400, -7.6500], // SW
+      [33.4800, -7.7000], // W – Tamaris
+      [33.5100, -7.7200], // NW – Dar Bouazza
+      [33.5300, -7.6900], // N coastal
+    ]
+  },
+  // ── Named cities outside Casablanca ──────────────────────────────────────
+  mohammedia: {
+    name:  "Mohammedia",
+    color: "#1abc9c",
+    poly: [
+      [33.7200, -7.4300],
+      [33.7200, -7.3500],
+      [33.6600, -7.3500],
+      [33.6600, -7.4300],
+    ]
+  },
+  berrechid: {
+    name:  "Berrechid / HUB",
+    color: "#f0a500",
+    poly: [
+      [33.3200, -7.6500],
+      [33.3200, -7.5400],
+      [33.2200, -7.5400],
+      [33.2200, -7.6500],
+    ]
+  },
+  settat: {
+    name:  "Settat",
+    color: "#e74c3c",
+    poly: [
+      [33.0500, -7.6800],
+      [33.0500, -7.5800],
+      [32.9500, -7.5800],
+      [32.9500, -7.6800],
+    ]
+  },
+  other: {
+    name:  "Other",
+    color: "#7f8c8d",
+    poly:  null  // catch-all
+  }
+};
+
+// Point-in-polygon test (ray casting algorithm)
+function pointInPoly(lat, lng, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][1], yi = poly[i][0];
+    const xj = poly[j][1], yj = poly[j][0];
+    const intersect = ((yi > lat) !== (yj > lat))
+      && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function getCorridor(city, lat, lng) {
+  // If we have coordinates, use polygon test (authoritative)
+  if (lat !== undefined && lng !== undefined && !isNaN(lat) && !isNaN(lng)) {
+    for (const [k, c] of Object.entries(CORRIDORS)) {
+      if (k === "other" || !c.poly) continue;
+      if (pointInPoly(lat, lng, c.poly)) return k;
+    }
+    return "other";
+  }
+  // Fallback: city name matching for legacy calls
+  const cl = (city||"").toLowerCase();
+  if (cl.includes("mohammedia") || cl.includes("mohammédia")) return "mohammedia";
+  if (cl.includes("berrechid"))  return "berrechid";
+  if (cl.includes("settat"))     return "settat";
+  if (cl.includes("casablanca") || cl.includes("casa")) return "central";
+  if (cl.includes("bouskoura") || cl.includes("dar bouazza") || cl.includes("tamaris")) return "peripheral";
+  return "other";
+}
+
+const COL_MAP = {
+  order_id:  ["Matrix Order ID","ORDER NUMBER","order_number","id"],
+  created:   ["Creation Date","ORDER DATE","order_date","date"],
+  customer:  ["Customer","CUSTOMER NAME","customer_name","client"],
+  total:     ["Total","TOTAL VALUES","total_value","amount"],
+  city:      ["Customer/City","CITY","city","ville"],
+  x:         ["X","x","lng","longitude"],
+  y:         ["Y","y","lat","latitude"]
+};
+
+
+// ── METRICS ENGINE ────────────────────────────────────────────────────────────
+const METRICS_KEY = "tobeez_metrics_v1";
+let sessionStart = Date.now();
+
+function metricsLoad() {
+  try { return JSON.parse(localStorage.getItem(METRICS_KEY) || "[]"); } catch(e) { return []; }
+}
+function metricsSave(rows) {
+  try { localStorage.setItem(METRICS_KEY, JSON.stringify(rows)); } catch(e) {}
+}
+function metricsRecord(session) {
+  const rows = metricsLoad();
+  rows.unshift(session); // newest first
+  metricsSave(rows.slice(0, 365)); // keep 1 year max
+}
+function openMetrics() {
+  renderMetrics();
+  document.getElementById("metricsPanel").classList.add("open");
+}
+function closeMetrics() {
+  document.getElementById("metricsPanel").classList.remove("open");
+}
+function clearMetrics() {
+  if (!confirm("Clear all metrics data?")) return;
+  localStorage.removeItem(METRICS_KEY);
+  renderMetrics();
+}
+function renderMetrics() {
+  const rows = metricsLoad();
+  const tbody = document.getElementById("metricsBody");
+  const empty = document.getElementById("metricsEmpty");
+  const kpis  = document.getElementById("metricsKpis");
+
+  if (!rows.length) {
+    tbody.innerHTML = "";
+    empty.style.display = "block";
+    kpis.innerHTML = "";
+    return;
+  }
+  empty.style.display = "none";
+
+  // KPIs
+  const totalSessions = rows.length;
+  const avgKm   = (rows.reduce((s,r)=>s+(r.km||0),0)/totalSessions).toFixed(1);
+  const avgStops = Math.round(rows.reduce((s,r)=>s+(r.stops||0),0)/totalSessions);
+  const totalVal = rows.reduce((s,r)=>s+(r.value||0),0).toFixed(0);
+  const avgPlan  = Math.round(rows.reduce((s,r)=>s+(r.planMin||0),0)/totalSessions);
+  kpis.innerHTML = `
+    <div class="kpi"><div class="kpi-v">${totalSessions}</div><div class="kpi-l">Sessions Logged</div></div>
+    <div class="kpi"><div class="kpi-v">${avgKm} km</div><div class="kpi-l">Avg Route Distance</div></div>
+    <div class="kpi"><div class="kpi-v">${avgStops}</div><div class="kpi-l">Avg Stops/Day</div></div>
+    <div class="kpi"><div class="kpi-v">${avgPlan}m</div><div class="kpi-l">Avg Planning Time</div></div>
+  `;
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td class="num">${r.date||"—"}</td>
+      <td>${r.corridors||"—"}</td>
+      <td class="num">${r.stops||0}</td>
+      <td class="num good">${(r.km||0).toFixed(1)} km</td>
+      <td class="num">${r.duration||"—"}</td>
+      <td class="num">${(r.value||0).toLocaleString("fr-MA",{maximumFractionDigits:0})} MAD</td>
+      <td class="num good">${r.confirmed||0}</td>
+      <td class="num" style="color:var(--red)">${r.deferred||0}</td>
+      <td class="num">${r.planMin||0} min</td>
+    </tr>`).join("");
+}
+function exportMetrics() {
+  const rows = metricsLoad();
+  if (!rows.length) return toast("No metrics yet");
+  const headers = ["Date","Corridors","Stops","KM","Duration","Value MAD","Confirmed","Deferred","Planning Min"];
+  const csv = [headers.join(","), ...rows.map(r =>
+    [r.date,r.corridors,r.stops,(r.km||0).toFixed(1),r.duration,r.value,r.confirmed,r.deferred,r.planMin].join(",")
+  )].join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "tobeez_metrics.csv";
+  a.click();
+  toast("Metrics exported");
+}
+
+// ── ORDER CONFIRMATION STATE ──────────────────────────────────────────────────
+// Map: order_number -> true (confirmed) | false (deferred)
+// Default: all confirmed
+const orderStatus = {}; // order_number -> "confirmed"|"deferred"
+
+function getOrderStatus(orderNum) {
+  return orderStatus[orderNum] !== "deferred"; // true = confirmed
+}
+function toggleOrderStatus(orderNum, el, rowEl) {
+  const isConfirmed = getOrderStatus(orderNum);
+  if (isConfirmed) {
+    orderStatus[orderNum] = "deferred";
+    el.textContent = "✕";
+    el.style.background = "transparent";
+    rowEl.classList.add("deferred");
+    rowEl.querySelector(".o-status").textContent = "DEFER";
+  } else {
+    delete orderStatus[orderNum];
+    el.textContent = "✓";
+    el.style.background = "var(--green)";
+    rowEl.classList.remove("deferred");
+    rowEl.querySelector(".o-status").textContent = "OK";
+  }
+  // Update corridor badge counts
+  refreshCorridorBadges();
+}
+function refreshCorridorBadges() {
+  // Recount confirmed orders per corridor
+  const grouped = {};
+  for (const o of dayOrders) {
+    if (getOrderStatus(o.order_number)) {
+      const k = getCorridor(o.city, o.lat, o.lng);
+      if (!grouped[k]) grouped[k] = 0;
+      grouped[k]++;
+    }
+  }
+  for (const [k, count] of Object.entries(grouped)) {
+    const badge = document.querySelector(`#ci-${k} .cconf-badge`);
+    if (badge) badge.textContent = count + " ✓";
+  }
+}
+function getConfirmedOrders() {
+  return dayOrders.filter(o => getOrderStatus(o.order_number));
+}
+function getDeferredOrders() {
+  return dayOrders.filter(o => !getOrderStatus(o.order_number));
+}
+
+// getCorridor: see polygon-based version above
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let allOrders = [], dayOrders = [], selectedKeys = new Set();
+let routeStops = [], isOptimized = false, allSelected = false;
+let dotData = [];
+
+// Map state
+const canvas = document.getElementById("mapCanvas");
+const ctx    = canvas.getContext("2d");
+let view = { lat:33.42, lng:-7.62, zoom:10 };
+let drag = null;
+const tileCache = {}, pendingTiles = new Set();
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  resize();
+  window.addEventListener("resize", resize);
+  draw();
+  // Drag-drop on splash
+  const splash = document.getElementById("splash");
+  const box    = document.getElementById("splashBox");
+  splash.addEventListener("dragover",  e => { e.preventDefault(); box.classList.add("drag-over"); });
+  splash.addEventListener("dragleave", () => box.classList.remove("drag-over"));
+  splash.addEventListener("drop", e => {
+    e.preventDefault(); box.classList.remove("drag-over");
+    if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+  });
+};
+
+// ── TILE MAP ──────────────────────────────────────────────────────────────────
+function tileUrl(z, x, y) {
+  const s = ["a","b","c"][Math.abs(x + y + z) % 3];
+  return `https://${s}.basemaps.cartocdn.com/dark_matter_lite/${z}/${x}/${y}.png`;
+}
+
+function ll2tp(lat, lng, z) {          // lat/lng -> tile position (fractional)
+  const n = Math.pow(2, z);
+  const px = (lng + 180) / 360 * n;
+  const lr = lat * Math.PI / 180;
+  const py = (1 - Math.log(Math.tan(lr) + 1/Math.cos(lr)) / Math.PI) / 2 * n;
+  return { x:px, y:py };
+}
+
+function tp2ll(tx, ty, z) {           // tile pos -> lat/lng
+  const n = Math.pow(2, z);
+  const lng = tx / n * 360 - 180;
+  const lr  = Math.atan(Math.sinh(Math.PI * (1 - 2*ty/n)));
+  return { lat: lr * 180 / Math.PI, lng };
+}
+
+function ll2screen(lat, lng) {
+  const z  = view.zoom;
+  const sc = 256;
+  const o  = ll2tp(view.lat, view.lng, z);
+  const p  = ll2tp(lat, lng, z);
+  return { x:(p.x - o.x)*sc + canvas.width/2, y:(p.y - o.y)*sc + canvas.height/2 };
+}
+
+function screen2ll(px, py) {
+  const z  = view.zoom;
+  const sc = 256;
+  const o  = ll2tp(view.lat, view.lng, z);
+  const tx = (px - canvas.width/2)/sc  + o.x;
+  const ty = (py - canvas.height/2)/sc + o.y;
+  const n  = Math.pow(2, z);
+  const lng = tx / n * 360 - 180;
+  const lr  = Math.atan(Math.sinh(Math.PI * (1 - 2*ty/n)));
+  return { lat: lr * 180/Math.PI, lng };
+}
+
+function drawTiles() {
+  const z  = Math.floor(view.zoom);
+  const sc = 256;                       // tile pixel size at this zoom
+  const tl = screen2ll(0, 0);
+  const br = screen2ll(canvas.width, canvas.height);
+  const t0 = ll2tp(tl.lat, tl.lng, z);
+  const t1 = ll2tp(br.lat, br.lng, z);
+  const x0 = Math.floor(t0.x) - 1, x1 = Math.floor(t1.x) + 1;
+  const y0 = Math.floor(t0.y) - 1, y1 = Math.floor(t1.y) + 1;
+
+  for (let tx = x0; tx <= x1; tx++) {
+    for (let ty = y0; ty <= y1; ty++) {
+      const key = `${z}/${tx}/${ty}`;
+      const pos = ll2screen(tp2ll(tx, ty, z).lat, tp2ll(tx, ty, z).lng);
+      const img = tileCache[key];
+      if (img && img.complete && img.naturalWidth > 0) {
+        ctx.drawImage(img, Math.round(pos.x), Math.round(pos.y), sc + 1, sc + 1);
+      } else if (!pendingTiles.has(key)) {
+        pendingTiles.add(key);
+        const i = new Image();
+        i.crossOrigin = "anonymous";
+        i.onload  = () => { tileCache[key] = i; pendingTiles.delete(key); draw(); };
+        i.onerror = () => { pendingTiles.delete(key); };
+        i.src = tileUrl(z, tx, ty);
+        tileCache[key] = i;
+      }
+    }
+  }
+}
+
+// ── DRAW ──────────────────────────────────────────────────────────────────────
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#1a1a2e";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawTiles();
+  drawSectorPolygons();
+  if (isOptimized && routeStops.length) drawRoute();
+  drawDots();
+  drawPOIs();
+}
+
+function drawSectorPolygons() {
+  for (const [k, c] of Object.entries(CORRIDORS)) {
+    if (!c.poly) continue;
+    const isSelected = selectedKeys.has(k);
+    const hasData    = dayOrders.some(o => getCorridor(o.city, o.lat, o.lng) === k);
+    if (!hasData && !isSelected) continue; // only draw sectors with data
+
+    ctx.beginPath();
+    c.poly.forEach((pt, i) => {
+      const s = ll2screen(pt[0], pt[1]);
+      i === 0 ? ctx.moveTo(s.x, s.y) : ctx.lineTo(s.x, s.y);
+    });
+    ctx.closePath();
+
+    // Fill: subtle tint, brighter if selected
+    ctx.globalAlpha = isSelected ? 0.18 : 0.07;
+    ctx.fillStyle = c.color;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Stroke: visible border
+    ctx.strokeStyle = c.color + (isSelected ? "cc" : "66");
+    ctx.lineWidth   = isSelected ? 2.5 : 1.5;
+    ctx.setLineDash(isSelected ? [] : [5, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Label in centroid area
+    if (view.zoom >= 11) {
+      const cx = c.poly.reduce((s,p) => s+p[1], 0) / c.poly.length;
+      const cy = c.poly.reduce((s,p) => s+p[0], 0) / c.poly.length;
+      const sp = ll2screen(cy, cx);
+      ctx.globalAlpha = isSelected ? 1 : 0.55;
+      ctx.fillStyle   = c.color;
+      ctx.font        = "bold 11px DM Sans, sans-serif";
+      ctx.textAlign   = "center";
+      ctx.textBaseline = "middle";
+      // Small background pill
+      const tw = ctx.measureText(c.name).width;
+      ctx.fillStyle = "rgba(15,17,23,0.75)";
+      ctx.beginPath();
+      ctx.roundRect(sp.x - tw/2 - 5, sp.y - 9, tw + 10, 18, 4);
+      ctx.fill();
+      ctx.fillStyle = c.color;
+      ctx.fillText(c.name, sp.x, sp.y);
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+function drawRoute() {
+  const pts = [HUB, ...routeStops, AGENT_HOME];
+  ctx.beginPath();
+  pts.forEach((p, i) => {
+    const s = ll2screen(p.lat, p.lng);
+    i === 0 ? ctx.moveTo(s.x, s.y) : ctx.lineTo(s.x, s.y);
+  });
+  ctx.strokeStyle = "rgba(240,165,0,.8)";
+  ctx.lineWidth   = 3;
+  ctx.setLineDash([9, 5]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Arrow heads
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = ll2screen(pts[i].lat, pts[i].lng);
+    const b = ll2screen(pts[i+1].lat, pts[i+1].lng);
+    if (Math.hypot(b.x-a.x, b.y-a.y) < 18) continue;
+    const mx = (a.x+b.x)/2, my = (a.y+b.y)/2;
+    const angle = Math.atan2(b.y-a.y, b.x-a.x);
+    ctx.save(); ctx.translate(mx, my); ctx.rotate(angle);
+    ctx.fillStyle = "rgba(240,165,0,.9)";
+    ctx.beginPath(); ctx.moveTo(7,0); ctx.lineTo(-5,-4); ctx.lineTo(-5,4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawDots() {
+  dotData = [];
+  const byC = {};
+  for (const o of dayOrders) {
+    if (!byC[o.customer_id]) byC[o.customer_id] = {...o, orders:[]};
+    byC[o.customer_id].orders.push(o);
+  }
+  for (const stop of Object.values(byC)) {
+    const ck  = getCorridor(stop.city, stop.lat, stop.lng);
+    const col = CORRIDORS[ck].color;
+    const pos = ll2screen(stop.lat, stop.lng);
+    const isSel = selectedKeys.has(ck);
+    const dim   = selectedKeys.size > 0 && !isSel;
+    const idx   = routeStops.findIndex(s => s.customer_id === stop.customer_id);
+    const isLast = isOptimized && idx === routeStops.length - 1;
+    const r = isSel ? 10 : 7;
+
+    ctx.globalAlpha = dim ? 0.15 : 1;
+    ctx.shadowColor = dim ? "transparent" : col;
+    ctx.shadowBlur  = isSel ? 8 : 3;
+    ctx.beginPath(); ctx.arc(pos.x, pos.y, r, 0, Math.PI*2);
+    ctx.fillStyle = isLast ? "#2ecc71" : col;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    if (isSel) {
+      ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    if (isOptimized && idx >= 0) {
+      ctx.fillStyle = "#000";
+      ctx.font = `bold ${r > 8 ? 8 : 7}px Space Mono,monospace`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(idx + 1, pos.x, pos.y);
+    }
+    ctx.globalAlpha = 1;
+    dotData.push({...stop, ck, col, cx:pos.x, cy:pos.y, r});
+  }
+}
+
+function drawPOIs() {
+  // HUB
+  const hp = ll2screen(HUB.lat, HUB.lng);
+  ctx.shadowColor = "#f0a500"; ctx.shadowBlur = 14;
+  ctx.beginPath(); ctx.arc(hp.x, hp.y, 14, 0, Math.PI*2);
+  ctx.fillStyle = "#f0a500"; ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.fillStyle = "#000"; ctx.font = "bold 9px sans-serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("HUB", hp.x, hp.y);
+
+  // Home
+  const ap = ll2screen(AGENT_HOME.lat, AGENT_HOME.lng);
+  ctx.shadowColor = "#2ecc71"; ctx.shadowBlur = 10;
+  ctx.beginPath(); ctx.arc(ap.x, ap.y, 12, 0, Math.PI*2);
+  ctx.fillStyle = "#2ecc71"; ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 2; ctx.stroke();
+  ctx.font = "11px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("\u{1F3E0}", ap.x, ap.y);
+}
+
+// ── MAP EVENTS ────────────────────────────────────────────────────────────────
+canvas.addEventListener("mousedown", e => {
+  drag = { x:e.clientX, y:e.clientY, lat:view.lat, lng:view.lng };
+});
+canvas.addEventListener("mousemove", e => {
+  if (drag) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    const sc = 256;
+    const o  = ll2tp(drag.lat, drag.lng, view.zoom);
+    const tx = o.x - dx/sc, ty = o.y - dy/sc;
+    const n  = Math.pow(2, view.zoom);
+    view.lng = tx / n * 360 - 180;
+    const lr = Math.atan(Math.sinh(Math.PI * (1 - 2*ty/n)));
+    view.lat = lr * 180 / Math.PI;
+    draw(); return;
+  }
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const hit = dotData.find(d => Math.hypot(d.cx-mx, d.cy-my) < d.r + 6);
+  const tt  = document.getElementById("tooltip");
+  if (hit) {
+    const tv = hit.orders.reduce((s,o) => s+o.total_value, 0).toFixed(2);
+    document.getElementById("tt-name").textContent = hit.customer_name;
+    document.getElementById("tt-city").innerHTML   = `<strong>City:</strong> ${hit.city}`;
+    document.getElementById("tt-corr").innerHTML   = `<strong>Corridor:</strong> ${CORRIDORS[hit.ck].name}`;
+    document.getElementById("tt-orders").innerHTML = `<strong>Orders:</strong> ${hit.orders.length}`;
+    document.getElementById("tt-value").innerHTML  = `<strong>Value:</strong> ${tv} MAD`;
+    tt.style.display = "block";
+    tt.style.left = (mx+14)+"px"; tt.style.top = (my-10)+"px";
+  } else tt.style.display = "none";
+});
+canvas.addEventListener("mouseup",    () => { drag = null; });
+canvas.addEventListener("mouseleave", () => { drag = null; document.getElementById("tooltip").style.display="none"; });
+canvas.addEventListener("wheel", e => {
+  e.preventDefault();
+  view.zoom = Math.max(8, Math.min(18, view.zoom + (e.deltaY > 0 ? -0.75 : 0.75)));
+  draw();
+}, {passive:false});
+
+function zoomIn()  { view.zoom = Math.min(18, view.zoom+1); draw(); }
+function zoomOut() { view.zoom = Math.max(8,  view.zoom-1); draw(); }
+function resetView() {
+  if (dayOrders.length) {
+    const lats = dayOrders.map(o=>o.lat), lngs = dayOrders.map(o=>o.lng);
+    view.lat  = (Math.min(...lats)+Math.max(...lats))/2;
+    view.lng  = (Math.min(...lngs)+Math.max(...lngs))/2;
+    view.zoom = 11;
+  } else { view = {lat:33.42, lng:-7.62, zoom:10}; }
+  draw();
+}
+function resize() {
+  canvas.width  = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
+  draw();
+}
+
+// ── IMPORT ────────────────────────────────────────────────────────────────────
+function importFile(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+
+function dbg(msg) {
+  const log = document.getElementById("debugLog");
+  if (log) { log.style.display="block"; log.innerHTML += msg + "<br>"; log.scrollTop=log.scrollHeight; }
+  console.log("[TOBEEZ]", msg);
+}
+
+function showPaste() {
+  const p = document.getElementById("pasteArea");
+  p.style.display = p.style.display === "none" ? "block" : "none";
+}
+
+function parsePaste() {
+  const text = document.getElementById("pasteBox").value.trim();
+  if (!text) return toast("Nothing pasted");
+  parseCSV(text);
+}
+
+function processFile(file) {
+  dbg("File: " + file.name + " (" + Math.round(file.size/1024) + " KB)");
+  toast("Reading...");
+  const ext = file.name.toLowerCase().split(".").pop();
+
+  if (ext === "csv" || ext === "tsv" || ext === "txt") {
+    const reader = new FileReader();
+    reader.onload = e => parseCSV(e.target.result);
+    reader.onerror = () => toast("Could not read file");
+    reader.readAsText(file, "UTF-8");
+    return;
+  }
+
+  if (ext === "xlsx" || ext === "xls" || ext === "xlsm") {
+    const reader = new FileReader();
+    reader.onload = e => parseXLSX(new Uint8Array(e.target.result));
+    reader.onerror = () => { dbg("FileReader failed"); toast("Could not read file"); };
+    reader.readAsArrayBuffer(file);
+    return;
+  }
+
+  toast("Unsupported format — use .xlsx or .csv");
+}
+
+function afterImport(orders, src) {
+  dbg("afterImport: " + orders.length + " orders from " + src);
+  if (!orders.length) {
+    toast("No valid orders — check debug log or use Paste from Excel");
+    return;
+  }
+  allOrders = orders;
+  const dates = [...new Set(orders.map(o=>o.delivery_date))].sort();
+  dbg("Dates in file: " + dates.join(", "));
+  const earliest = dates[0];
+  const latest   = dates[dates.length-1];
+  dbg("Setting date range: " + earliest + " to " + latest);
+  document.getElementById("dateFrom").value = earliest;
+  document.getElementById("dateTo").value   = latest;
+  // Hide splash only after everything is set
+  sessionStart = Date.now(); // start planning timer
+  document.getElementById("splash").style.display = "none";
+  toast("✓ "+orders.length+" orders · "+dates.length+" date(s) · "+earliest+(earliest!==latest?" → "+latest:""));
+  loadRange();
+}
+
+function parseCSVRow(line, delim) {
+  const cells = [];
+  let cur = "", inQ = false, i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"') {
+        if (line[i+1] === '"') { cur += '"'; i += 2; }
+        else { inQ = false; i++; }
+      } else { cur += ch; i++; }
+    } else {
+      if (ch === '"') { inQ = true; i++; }
+      else if (ch === delim) { cells.push(cur.trim()); cur = ""; i++; }
+      else { cur += ch; i++; }
+    }
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+function parseCSV(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const lines = text.trim().split(/\r?\n/);
+  dbg("CSV lines: " + lines.length);
+  const tabCount   = (lines[0].match(/\t/g)||[]).length;
+  const commaCount = (lines[0].match(/,/g)||[]).length;
+  const delim = tabCount >= commaCount ? "\t" : ",";
+  dbg("Delimiter: " + (delim==="\t"?"TAB":"COMMA") + " (tabs:"+tabCount+", commas:"+commaCount+")");
+  const headers = parseCSVRow(lines[0], delim).map(h => h.replace(/^["\uFEFF]+|["]+$/g,"").trim());
+  dbg("Headers (" + headers.length + "): " + JSON.stringify(headers));
+  const orders = []; let skipped = 0;
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseCSVRow(lines[i], delim);
+    const row = {};
+    headers.forEach((h, j) => row[h] = vals[j] !== undefined ? vals[j] : "");
+    const o = mapRow(row);
+    if (o) orders.push(o); else skipped++;
+  }
+  dbg("Valid: " + orders.length + " | Skipped: " + skipped);
+  if (orders.length === 0 && skipped > 0) {
+    dbg("Row 1 raw: " + JSON.stringify(lines[1]));
+    dbg("Row 1 parsed cols: " + JSON.stringify(parseCSVRow(lines[1], delim)));
+  }
+  afterImport(orders, "CSV/Paste");
+}
+
+function parseDate(raw) {
+  if (!raw && raw !== 0) return new Date().toISOString().split("T")[0];
+  const s = String(raw).trim();
+
+  // Already ISO: 2026-02-24
+  if (s.match(/^\d{4}-\d{2}-\d{2}/)) return s.slice(0,10);
+
+  // Excel serial number (SheetJS raw:true returns numbers for date cells)
+  // Excel dates are days since 1900-01-01 (with leap year bug: serial 1=Jan1, 60=fake Feb29)
+  if (/^\d{4,5}(\.\d+)?$/.test(s)) {
+    const serial = parseFloat(s);
+    if (serial > 40000 && serial < 60000) { // sanity: years ~2010-2064
+      const d = new Date(Math.round((serial - 25569) * 86400000));
+      return d.toISOString().split("T")[0];
+    }
+  }
+
+  // M/D/YYYY or D/M/YYYY (with optional time suffix "2/24/2026 2:43 PM")
+  const datePart = s.split(/\s+/)[0];
+  const slashMatch = datePart.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (slashMatch) {
+    const a = parseInt(slashMatch[1]), b = parseInt(slashMatch[2]), yr = slashMatch[3];
+    // If a > 12, must be day — format as DD/MM/YYYY
+    if (a > 12) return yr+"-"+String(b).padStart(2,"0")+"-"+String(a).padStart(2,"0");
+    // Otherwise assume M/D/YYYY (US format, matches Excel default)
+    return yr+"-"+String(a).padStart(2,"0")+"-"+String(b).padStart(2,"0");
+  }
+
+  // YYYY/MM/DD
+  const ymdMatch = datePart.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+  if (ymdMatch) return ymdMatch[1]+"-"+ymdMatch[2].padStart(2,"0")+"-"+ymdMatch[3].padStart(2,"0");
+
+  // Try native Date parse as last resort
+  try {
+    const d = new Date(s);
+    if (!isNaN(d)) return d.toISOString().split("T")[0];
+  } catch(e) {}
+
+  return new Date().toISOString().split("T")[0];
+}
+
+function mapRow(row) {
+  const get = field => {
+    for (const a of COL_MAP[field]) {
+      const v = row[a];
+      if (v !== undefined && String(v).trim() !== "") return String(v).trim();
+    }
+    return "";
+  };
+
+  // X=lat (~33.5), Y=lng (~-7.5) in your file — auto-detect orientation
+  const rawX = parseFloat(get("x")), rawY = parseFloat(get("y"));
+  if (isNaN(rawX) || isNaN(rawY)) { return null; }
+  let lat, lng;
+  if (rawX > 20 && rawX < 40 && rawY < 0)      { lat=rawX; lng=rawY; }
+  else if (rawY > 20 && rawY < 40 && rawX < 0) { lat=rawY; lng=rawX; }
+  else return null;
+  if (lat < 28 || lat > 36 || lng < -12 || lng > 0) return null;
+
+  const city = get("city") || "Unknown";
+
+  // Parse date — handles all formats SheetJS can return
+  let dd = parseDate(get("created"));
+
+  const name = get("customer") || "Unknown";
+  const totalRaw = get("total").replace(/,/g, "").replace(/\s/g, "");
+  return {
+    order_number:  get("order_id"),
+    customer_id:   `${name}|${lat.toFixed(5)}|${lng.toFixed(5)}`,
+    customer_name: name, city, lat, lng, delivery_date: dd,
+    total_value:   parseFloat(totalRaw) || 0, total_items: 1
+  };
+}
+
+function parseXLSX(u8) {
+  try {
+    dbg("Parsing XLSX (" + u8.length + " bytes)...");
+    const zip = unzip(u8);
+    const keys = Object.keys(zip);
+    dbg("ZIP entries: " + keys.join(", "));
+    const ss  = parseSharedStrings(zip["xl/sharedStrings.xml"] || "");
+    dbg("Shared strings: " + ss.length);
+    const wsKey = keys.find(k => /xl\/worksheets\/sheet1?\.xml/i.test(k)) || "";
+    const ws = wsKey ? zip[wsKey] : "";
+    dbg("Worksheet: " + wsKey + " (" + ws.length + " chars)");
+    if (!ws) { toast("Cannot read sheet — save as CSV and retry"); return; }
+    const rows = parseSheet(ws, ss);
+    dbg("Rows: " + rows.length);
+    if (rows.length < 2) { toast("Sheet appears empty"); return; }
+    const headers = rows[0].map(h => String(h||"").trim());
+    dbg("Headers: " + JSON.stringify(headers));
+    const orders = []; let skipped = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const row = {};
+      headers.forEach((h, j) => row[h] = String(rows[i][j] ?? "").trim());
+      const o = mapRow(row);
+      if (o) orders.push(o); else skipped++;
+    }
+    dbg("Valid: " + orders.length + " | Skipped: " + skipped);
+    if (orders.length === 0 && skipped > 0) {
+      dbg("First row dump: " + JSON.stringify(rows[1]));
+    }
+    afterImport(orders, "Excel");
+  } catch(e) {
+    dbg("XLSX error: " + e.message);
+    console.error(e);
+    toast("XLSX parse failed — save file as CSV and try again");
+  }
+}
+
+function unzip(u8) {
+  const files = {}; let i = 0;
+  while (i < u8.length - 4) {
+    if (u8[i]===0x50&&u8[i+1]===0x4B&&u8[i+2]===0x03&&u8[i+3]===0x04) {
+      const method = u8[i+8]|(u8[i+9]<<8);
+      const comp   = u8[i+18]|(u8[i+19]<<8)|(u8[i+20]<<16)|(u8[i+21]<<24);
+      const fnLen  = u8[i+26]|(u8[i+27]<<8);
+      const exLen  = u8[i+28]|(u8[i+29]<<8);
+      const fn     = new TextDecoder().decode(u8.slice(i+30, i+30+fnLen));
+      const ds     = i+30+fnLen+exLen;
+      const data   = u8.slice(ds, ds+comp);
+      try {
+        files[fn] = method===0
+          ? new TextDecoder().decode(data)
+          : inflateRaw(data);
+      } catch(e) { files[fn]=""; }
+      i = ds + comp;
+    } else i++;
+  }
+  return files;
+}
+
+function inflateRaw(data) {
+  let bp = 0;
+  const rb  = () => { const b=(data[bp>>3]>>(bp&7))&1; bp++; return b; };
+  const rbs = n => { let v=0; for(let i=0;i<n;i++) v|=rb()<<i; return v; };
+  const out = [];
+  const bfixLL = (() => {
+    const l=[]; for(let i=0;i<144;i++)l.push(8); for(let i=144;i<256;i++)l.push(9);
+    for(let i=256;i<280;i++)l.push(7); for(let i=280;i<288;i++)l.push(8); return bld(l);
+  })();
+  const bfixD = (() => { const l=[]; for(let i=0;i<32;i++)l.push(5); return bld(l); })();
+  function bld(ls) {
+    const maxL=Math.max(...ls), cnt=new Array(maxL+1).fill(0);
+    ls.forEach(l=>{if(l>0)cnt[l]++;}); const nc=new Array(maxL+2).fill(0); let code=0;
+    for(let i=1;i<=maxL;i++){code=(code+cnt[i-1])<<1;nc[i]=code;}
+    const t={}; ls.forEach((l,s)=>{if(l>0){t[s]={c:nc[l],l};nc[l]++;}});return t;
+  }
+  function hdec(t) {
+    let c=0,l=0;
+    for(let i=0;i<16;i++){c=(c<<1)|rb();l++;for(const[s,e]of Object.entries(t)){if(e.l===l&&e.c===c)return+s;}}
+    return -1;
+  }
+  function dyn() {
+    const hlit=rbs(5)+257,hdist=rbs(5)+1,hclen=rbs(4)+4;
+    const ord=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+    const cl=new Array(19).fill(0); for(let i=0;i<hclen;i++)cl[ord[i]]=rbs(3);
+    const ct=bld(cl); const al=[];
+    while(al.length<hlit+hdist){
+      const s=hdec(ct);
+      if(s<16)al.push(s);
+      else if(s===16){const r=rbs(2)+3;for(let i=0;i<r;i++)al.push(al[al.length-1]);}
+      else if(s===17){const r=rbs(3)+3;for(let i=0;i<r;i++)al.push(0);}
+      else{const r=rbs(7)+11;for(let i=0;i<r;i++)al.push(0);}
+    }
+    return{ll:bld(al.slice(0,hlit)),d:bld(al.slice(hlit))};
+  }
+  const lB=[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+  const lE=[0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
+  const dB=[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
+  const dE=[0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
+  while(true){
+    const fin=rb(),btype=rbs(2);
+    if(btype===0){
+      bp=(bp+7)&~7; const len=rbs(8)|(rbs(8)<<8); rbs(8);rbs(8);
+      for(let i=0;i<len;i++)out.push(rbs(8));
+    } else {
+      let ll,d;
+      if(btype===1){ll=bfixLL;d=bfixD;} else{const r=dyn();ll=r.ll;d=r.d;}
+      while(true){
+        const sym=hdec(ll);
+        if(sym<256)out.push(sym);
+        else if(sym===256)break;
+        else{
+          const len=lB[sym-257]+rbs(lE[sym-257]);
+          const ds=hdec(d);
+          const dist=dB[ds]+rbs(dE[ds]);
+          for(let i=0;i<len;i++)out.push(out[out.length-dist]);
+        }
+      }
+    }
+    if(fin)break;
+  }
+  return new TextDecoder().decode(new Uint8Array(out));
+}
+
+function parseSharedStrings(xml) {
+  const r=[];
+  for(const m of xml.matchAll(/<t(?:\s[^>]*)?>([^<]*)<\/t>/g))
+    r.push(m[1].replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(n)));
+  return r;
+}
+
+function parseSheet(xml, ss) {
+  const rows = [];
+  for (const rm of xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)) {
+    const cells = [];
+    // Match full cell tag so we can extract t= from anywhere in it
+    for (const cm of rm[1].matchAll(/<c ([^>]*)>(?:[\s\S]*?<v>([^<]*)<\/v>)?(?:[\s\S]*?<t>([^<]*)<\/t>)?[\s\S]*?<\/c>/g)) {
+      const attrs = cm[1];
+      const v     = cm[2] || "";
+      const inlineText = cm[3] || "";
+      // Extract column ref: r="A1" or r="AA23"
+      const rMatch = attrs.match(/\br="([A-Z]+)\d+"/);
+      if (!rMatch) continue;
+      const col = rMatch[1].split("").reduce((n,c) => n*26 + c.charCodeAt(0)-64, 0) - 1;
+      while (cells.length < col) cells.push("");
+      // Extract type: t="s" (shared string), t="str" (inline), t="inlineStr", etc.
+      const tMatch = attrs.match(/\bt="([^"]*)"/);
+      const t = tMatch ? tMatch[1] : "";
+      if (t === "s")         cells.push(ss[+v] || "");
+      else if (inlineText)   cells.push(inlineText);
+      else if (t === "str")  cells.push(v);
+      else                   cells.push(v);
+    }
+    if (cells.some(c => c !== "")) rows.push(cells);
+  }
+  return rows;
+}
+
+// ── FILTER ────────────────────────────────────────────────────────────────────
+function setQuick(mode) {
+  const now=new Date(), fmt=d=>d.toISOString().split("T")[0];
+  if(mode==="today"){document.getElementById("dateFrom").value=fmt(now);document.getElementById("dateTo").value=fmt(now);}
+  else if(mode==="tomorrow"){const t=new Date(now);t.setDate(t.getDate()+1);document.getElementById("dateFrom").value=fmt(t);document.getElementById("dateTo").value=fmt(t);}
+  else if(mode==="week"){const e=new Date(now);e.setDate(e.getDate()+6);document.getElementById("dateFrom").value=fmt(now);document.getElementById("dateTo").value=fmt(e);}
+  document.getElementById("timeFrom").value="00:00";
+  document.getElementById("timeTo").value="23:59";
+  if(allOrders.length) loadRange();
+}
+
+function loadRange() {
+  if(!allOrders.length){toast("Upload a file first");return;}
+  const df=document.getElementById("dateFrom").value,dt=document.getElementById("dateTo").value;
+  if(!df||!dt) return toast("Select a date range");
+  const uniqueDates=[...new Set(allOrders.map(o=>o.delivery_date))].sort();
+  dbg("All dates in data: "+uniqueDates.join(", "));
+  dbg("Filter: "+df+" to "+dt);
+  dayOrders=allOrders.filter(o=>{
+    const d=o.delivery_date;
+    return d>=df && d<=dt;
+  });
+  dbg("Matched: "+dayOrders.length+" orders");
+  selectedKeys.clear();routeStops=[];isOptimized=false;allSelected=false;
+  document.getElementById("optBtn").style.display="none";
+  document.getElementById("routePanel").style.display="none";
+  document.getElementById("schedbar").style.display="none";
+  document.querySelector(".sal-btn").textContent="Select All";
+  if(!dayOrders.length){toast("No orders in this period");renderCorridors({});updateStats([]);return;}
+  const grouped={};
+  for(const o of dayOrders){const k=getCorridor(o.city, o.lat, o.lng);if(!grouped[k])grouped[k]=[];grouped[k].push(o);}
+  updateStats(dayOrders);renderCorridors(grouped);resetView();draw();
+  toast(`Loaded ${dayOrders.length} orders \u00B7 ${df===dt?df:df+" \u2192 "+dt}`);
+}
+
+function updateStats(orders) {
+  const stops=new Set(orders.map(o=>o.customer_id)).size;
+  const val=orders.reduce((s,o)=>s+(o.total_value||0),0);
+  document.getElementById("sv-orders").textContent=orders.length||"\u2014";
+  document.getElementById("sv-stops").textContent=stops||"\u2014";
+  document.getElementById("sv-value").textContent=orders.length?val.toLocaleString("fr-MA",{maximumFractionDigits:0}):"\u2014";
+  document.getElementById("sv-sel").textContent=selectedKeys.size;
+  if(!isOptimized){document.getElementById("sv-dist").textContent="\u2014";document.getElementById("sv-eta").textContent="\u2014";}
+}
+
+// ── CORRIDOR RENDER ───────────────────────────────────────────────────────────
+function renderCorridors(grouped) {
+  const list = document.getElementById("clist");
+  if (!Object.keys(grouped).length) {
+    list.innerHTML = `<div class="empty"><div class="eico">&#128219;</div><p>No orders in this period</p></div>`;
+    return;
+  }
+  list.innerHTML = "";
+
+  for (const [k, orders] of Object.entries(grouped)) {
+    const c = CORRIDORS[k];
+    const totalVal = orders.reduce((s,o) => s+(o.total_value||0), 0);
+    const uStops   = new Set(orders.map(o=>o.customer_id)).size;
+    const confirmed = orders.filter(o => getOrderStatus(o.order_number)).length;
+    const deferred  = orders.length - confirmed;
+
+    const div = document.createElement("div");
+    div.className = "citem"; div.id = "ci-"+k;
+
+    // Build order rows with confirm toggle
+    const orows = orders.map(o => {
+      const isConf = getOrderStatus(o.order_number);
+      const oid    = (o.order_number||"").toString().slice(-10);
+      return `<div class="orow${isConf?'':' deferred'}" id="orow-${o.order_number}">
+        <div class="o-confirm" id="obtn-${o.order_number}"
+          onclick="toggleOrderStatus('${o.order_number}',this,document.getElementById('orow-${o.order_number}'))"
+          title="${isConf?'Click to defer':'Click to confirm'}">${isConf?"✓":"✕"}</div>
+        <div class="o-status">${isConf?"OK":"DEFER"}</div>
+        <div class="o-id">${oid}</div>
+        <div class="o-nm">${o.customer_name||"—"}</div>
+        <div class="o-ct">${o.city||"—"}</div>
+        <div class="o-vl">${(o.total_value||0).toFixed(0)}</div>
+      </div>`;
+    }).join("");
+
+    const deferBadge = deferred > 0
+      ? `<span style="font-size:9px;color:var(--red);font-family:Space Mono,monospace;background:#e74c3c15;padding:1px 5px;border-radius:6px;margin-left:3px">${deferred} deferred</span>`
+      : "";
+
+    div.innerHTML = `
+      <div class="citem-hdr">
+        <div class="cchk"><span class="cchk-m">&#10003;</span></div>
+        <div class="cdot" style="background:${c.color}"></div>
+        <div class="cname">${c.name}</div>
+        <div class="cbadge cconf-badge">${confirmed} ✓</div>
+        ${deferBadge}
+        <button class="cexp" onclick="toggleDet(event,'${k}')">&#9660;</button>
+      </div>
+      <div class="cdet" id="cd-${k}">
+        <div class="cdet-title">Orders &nbsp;<span style="font-size:9px;color:var(--muted)">— click ✓/✕ to confirm or defer</span></div>
+        <div class="cdet-cols">
+          <span style="width:18px"></span>
+          <span style="width:36px">Status</span>
+          <span style="width:75px">Order ID</span>
+          <span style="flex:1">Client</span>
+          <span style="width:65px">City</span>
+          <span style="width:52px;text-align:right">MAD</span>
+        </div>
+        ${orows}
+        <div class="cdet-sum">
+          <span>${uStops} stops &middot; ${orders.length} orders &middot; <span style="color:var(--green)">${confirmed} confirmed</span></span>
+          <strong>${totalVal.toFixed(0)} MAD</strong>
+        </div>
+      </div>`;
+
+    div.querySelector(".citem-hdr").addEventListener("click", e => {
+      if (!e.target.classList.contains("cexp") && !e.target.classList.contains("o-confirm"))
+        toggleCorridor(k);
+    });
+    list.appendChild(div);
+  }
+  document.getElementById("clist-label").textContent = `${Object.keys(grouped).length} corridors`;
+}
+
+function toggleDet(e,k){
+  e.stopPropagation();
+  const d=document.getElementById("cd-"+k),btn=e.target,open=d.classList.contains("open");
+  document.querySelectorAll(".cdet").forEach(x=>x.classList.remove("open"));
+  document.querySelectorAll(".cexp").forEach(x=>x.classList.remove("open"));
+  if(!open){d.classList.add("open");btn.classList.add("open");}
+}
+
+function toggleCorridor(k){
+  if(selectedKeys.has(k))selectedKeys.delete(k);else selectedKeys.add(k);
+  document.getElementById("ci-"+k)?.classList.toggle("selected",selectedKeys.has(k));
+  document.getElementById("sv-sel").textContent=selectedKeys.size;
+  document.getElementById("optBtn").style.display=selectedKeys.size>0?"block":"none";
+  isOptimized=false;routeStops=[];
+  document.getElementById("routePanel").style.display="none";
+  document.getElementById("schedbar").style.display="none";
+  draw();
+}
+
+function toggleSelectAll(){
+  const grouped={};for(const o of dayOrders){const k=getCorridor(o.city, o.lat, o.lng);grouped[k]=true;}
+  const keys=Object.keys(grouped);
+  allSelected=!allSelected;selectedKeys.clear();
+  if(allSelected)keys.forEach(k=>selectedKeys.add(k));
+  keys.forEach(k=>document.getElementById("ci-"+k)?.classList.toggle("selected",allSelected));
+  document.getElementById("sv-sel").textContent=selectedKeys.size;
+  document.getElementById("optBtn").style.display=selectedKeys.size>0?"block":"none";
+  document.querySelector(".sal-btn").textContent=allSelected?"Deselect All":"Select All";
+  isOptimized=false;routeStops=[];
+  document.getElementById("routePanel").style.display="none";
+  document.getElementById("schedbar").style.display="none";
+  draw();
+}
+
+// ── OPTIMIZE ──────────────────────────────────────────────────────────────────
+function optimizeAll(){
+  if(!selectedKeys.size)return toast("Select at least one corridor");
+  // Only route CONFIRMED orders from selected corridors
+  const allSel   = dayOrders.filter(o=>selectedKeys.has(getCorridor(o.city, o.lat, o.lng)));
+  const sel      = allSel.filter(o=>getOrderStatus(o.order_number));
+  const deferred = allSel.filter(o=>!getOrderStatus(o.order_number));
+  if(deferred.length) dbg("Skipping "+deferred.length+" deferred orders");
+  if(!sel.length)return toast("No orders in selected corridors");
+  const stops=dedupeStops(sel);
+  if(!stops.length)return toast("No stops found");
+  const nnRoute   = nnWithHome(stops, HUB, AGENT_HOME);
+  const nnDist    = calcDist(nnRoute, HUB);
+  const ordered   = twoOpt(nnRoute, HUB);
+  const finalDist = calcDist(ordered, HUB);
+  const saved     = (nnDist - finalDist).toFixed(1);
+  routeStops = ordered; isOptimized = true;
+  const dist=calcDist(ordered,HUB);
+  const tMin=Math.round((dist/30)*60+ordered.length*8);
+  const etaH=DEPART_H+0.5+tMin/60;
+  const last=ordered[ordered.length-1];
+  const hd=haversine(last.lat,last.lng,AGENT_HOME.lat,AGENT_HOME.lng);
+  const etaHome=etaH+hd/30;
+  const val=sel.reduce((s,o)=>s+o.total_value,0);
+  document.getElementById("sv-dist").textContent=dist.toFixed(1)+" km";
+  document.getElementById("sv-eta").textContent=fmtH(etaHome);
+  document.getElementById("rp-corr").textContent=[...selectedKeys].length;
+  document.getElementById("rp-stops").textContent=ordered.length;
+  document.getElementById("rp-dist").textContent=dist.toFixed(1)+" km";
+  document.getElementById("rp-time").textContent=fmtT(tMin);
+  document.getElementById("rp-value").textContent=val.toFixed(0)+" MAD";
+  document.getElementById("rp-eta").textContent=fmtH(etaHome);
+  document.getElementById("rp-homedist").textContent=hd.toFixed(1)+" km";
+  document.getElementById("routePanel").style.display="block";
+  document.getElementById("sched-eta").innerHTML=`<div class="sdot" style="background:#2ecc71;width:7px;height:7px;border-radius:50%;flex-shrink:0"></div>${fmtH(etaHome)} \u2014 Arrive Bouskoura`;
+  document.getElementById("schedbar").style.display="block";
+  const cw=document.getElementById("capwarn");
+  if(ordered.length>22){cw.style.display="block";cw.textContent=`\u26A0 ${ordered.length} stops > 22 cap. Consider splitting.`;}else cw.style.display="none";
+  document.getElementById("rhead-label").textContent=`${ordered.length} stops \u00B7 ${dist.toFixed(1)} km`;
+  renderRouteList(ordered);
+  switchTab("route",document.querySelectorAll(".tab")[1]);
+  draw();
+  const savingMsg = +saved > 0 ? ` \u00B7 saved ${saved} km vs NN` : '';
+  toast(`\u2713 ${ordered.length} stops \u00B7 ${dist.toFixed(1)} km${savingMsg} \u00B7 ETA ${fmtH(etaHome)}`);
+}
+
+// ── NEAREST NEIGHBOR seed ─────────────────────────────────────────────────────
+function nnWithHome(stops, start, home) {
+  const uv = [...stops], route = []; let cur = start;
+  while (uv.length) {
+    const useHomeBias = uv.length <= 3;
+    let best = null, bestScore = Infinity, bestIdx = -1;
+    uv.forEach((s, i) => {
+      const d = haversine(cur.lat, cur.lng, s.lat, s.lng);
+      const score = useHomeBias ? d + haversine(s.lat, s.lng, home.lat, home.lng) * 0.5 : d;
+      if (score < bestScore) { bestScore = score; best = s; bestIdx = i; }
+    });
+    route.push(best); cur = best; uv.splice(bestIdx, 1);
+  }
+  return route;
+}
+
+// ── 2-OPT IMPROVEMENT ─────────────────────────────────────────────────────────
+// Repeatedly reverse sub-segments when it reduces total distance. O(n^2) per pass.
+function twoOpt(route, start) {
+  function tourDist(r) {
+    let d = haversine(start.lat, start.lng, r[0].lat, r[0].lng);
+    for (let i = 0; i < r.length - 1; i++)
+      d += haversine(r[i].lat, r[i].lng, r[i+1].lat, r[i+1].lng);
+    return d;
+  }
+  const distBefore = tourDist(route);
+  let best = [...route], improved = true, passes = 0;
+  while (improved && passes < 50) {
+    improved = false; passes++;
+    for (let i = 0; i < best.length - 1; i++) {
+      for (let j = i + 1; j < best.length; j++) {
+        const a1 = i === 0 ? start : best[i-1];
+        const a2 = best[i], b1 = best[j];
+        const b2 = j + 1 < best.length ? best[j+1] : null;
+        const before = haversine(a1.lat,a1.lng,a2.lat,a2.lng) + (b2?haversine(b1.lat,b1.lng,b2.lat,b2.lng):0);
+        const after  = haversine(a1.lat,a1.lng,b1.lat,b1.lng) + (b2?haversine(a2.lat,a2.lng,b2.lat,b2.lng):0);
+        if (after < before - 0.001) {
+          best = [...best.slice(0,i), ...best.slice(i,j+1).reverse(), ...best.slice(j+1)];
+          improved = true;
+        }
+      }
+    }
+  }
+  const distAfter = tourDist(best);
+  const saving = (distBefore - distAfter).toFixed(1);
+  dbg("2-opt: " + passes + " pass(es) | NN=" + distBefore.toFixed(1) + " km -> 2-opt=" + distAfter.toFixed(1) + " km | saved " + saving + " km");
+  return best;
+}
+
+function dedupeStops(orders){
+  const m={};
+  for(const o of orders){if(!m[o.customer_id])m[o.customer_id]={...o,orders:[]};m[o.customer_id].orders.push(o);}
+  return Object.values(m);
+}
+
+function renderRouteList(stops){
+  const c=document.getElementById("rstops");c.innerHTML="";
+  const hub=document.createElement("div");hub.className="scard";
+  hub.style.cssText="border-color:#f0a500;background:#f0a50012;";
+  hub.innerHTML=`<div class="snum" style="color:#f0a500">&#9733;</div><div class="si"><div class="sn">Berrechid HUB \u2014 Depart</div><div class="sm">07:30 load \u00B7 08:00 first delivery</div></div>`;
+  hub.onclick=()=>{view.lat=HUB.lat;view.lng=HUB.lng;view.zoom=14;draw();};
+  c.appendChild(hub);
+  stops.forEach((stop,i)=>{
+    const ck=getCorridor(stop.city, stop.lat, stop.lng),col=CORRIDORS[ck].color;
+    const val=stop.orders.reduce((s,o)=>s+o.total_value,0).toFixed(0);
+    const isLast=i===stops.length-1;
+    const div=document.createElement("div");div.className="scard";div.id="sc-"+i;
+    if(isLast)div.style.cssText="border-color:#2ecc7166;background:#2ecc7108;";
+    div.innerHTML=`<div class="snum" style="color:${isLast?"#2ecc71":col}">${i+1}${isLast?" &#127968;":""}</div>
+      <div class="si"><div class="sn">${stop.customer_name}</div>
+      <div class="sm">${stop.city} \u00B7 ${stop.orders.length} order(s) \u00B7 ${val} MAD${isLast?" \u00B7 closest to home":""}</div></div>
+      <span class="scorr" style="background:${col}22;color:${col}">${CORRIDORS[ck].name.split(" ")[0]}</span>`;
+    div.onclick=()=>{view.lat=stop.lat;view.lng=stop.lng;if(view.zoom<14)view.zoom=15;draw();div.classList.add("hl");setTimeout(()=>div.classList.remove("hl"),1200);};
+    c.appendChild(div);
+  });
+  const ret=document.createElement("div");ret.className="scard";
+  ret.style.cssText="border-color:#2ecc7166;background:#2ecc7110;";
+  ret.innerHTML=`<div class="snum" style="color:#2ecc71">&#127968;</div><div class="si"><div class="sn">Return Home \u2014 Bouskoura</div><div class="sm">End of day</div></div>`;
+  ret.onclick=()=>{view.lat=AGENT_HOME.lat;view.lng=AGENT_HOME.lng;view.zoom=14;draw();};
+  c.appendChild(ret);
+}
+
+// ── MATH ──────────────────────────────────────────────────────────────────────
+function calcDist(stops,start){
+  if(!stops.length)return 0;
+  let d=haversine(start.lat,start.lng,stops[0].lat,stops[0].lng);
+  for(let i=0;i<stops.length-1;i++)d+=haversine(stops[i].lat,stops[i].lng,stops[i+1].lat,stops[i+1].lng);
+  return d;
+}
+function haversine(a,b,c,d){
+  const R=6371,dLat=(c-a)*Math.PI/180,dLng=(d-b)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function fmtT(min){const h=Math.floor(min/60),m=min%60;return h>0?`${h}h ${m}m`:`${m}m`;}
+function fmtH(h){const t=Math.round(h*60),hh=Math.floor(t/60)%24,mm=t%60;return`${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}`;}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportCard(){
+  if(!isOptimized||!routeStops.length)return toast("Optimize a route first");
+  const df=document.getElementById("dateFrom").value,dt=document.getElementById("dateTo").value;
+  const dist=calcDist(routeStops,HUB).toFixed(1);
+  const val=routeStops.reduce((s,st)=>s+st.orders.reduce((a,o)=>a+o.total_value,0),0).toFixed(0);
+  const corrNames=[...selectedKeys].map(k=>CORRIDORS[k].name).join(", ");
+  const tMin=Math.round((+dist/30)*60+routeStops.length*8);
+  const last=routeStops[routeStops.length-1];
+  const hd=haversine(last.lat,last.lng,AGENT_HOME.lat,AGENT_HOME.lng);
+  const etaHome=fmtH(DEPART_H+0.5+tMin/60+hd/30);
+  const dateLabel=df===dt?df:`${df} \u2192 ${dt}`;
+
+  // ── Record this session in metrics ──
+  const planMin = Math.round((Date.now()-sessionStart)/60000);
+  const confirmedCount = routeStops.length;
+  const deferredCount  = getDeferredOrders().filter(o=>selectedKeys.has(getCorridor(o.city, o.lat, o.lng))).length;
+  metricsRecord({
+    date:      df,
+    corridors: corrNames,
+    stops:     routeStops.length,
+    km:        parseFloat(dist),
+    duration:  fmtT(tMin),
+    value:     parseFloat(val),
+    confirmed: confirmedCount,
+    deferred:  deferredCount,
+    planMin:   planMin
+  });
+  sessionStart = Date.now(); // reset for next session
+
+  // ── Segmented Google Maps links (max 10 stops per segment, Google Maps limit) ──
+  // Segments: 10+10+remainder. Each link ends where the next begins.
+  // Supports up to 35 stops (4 links max including home as final destination).
+  const SEG_SIZE = 10;
+  const numSegs  = Math.ceil(routeStops.length / SEG_SIZE);
+
+  function buildMapsUrl(segStops, originPt) {
+    const dest  = segStops[segStops.length - 1];
+    const wpts  = segStops.slice(0, -1);
+    return "https://www.google.com/maps/dir/?api=1"
+      + "&origin="      + originPt.lat + "," + originPt.lng
+      + "&destination=" + dest.lat + "," + dest.lng
+      + (wpts.length ? "&waypoints=" + encodeURIComponent(wpts.map(s => s.lat+","+s.lng).join("|")) : "")
+      + "&travelmode=driving";
+  }
+
+  const segUrls = [];
+  for (let si = 0; si < numSegs; si++) {
+    const seg    = routeStops.slice(si * SEG_SIZE, (si + 1) * SEG_SIZE);
+    const origin = si === 0 ? HUB : routeStops[si * SEG_SIZE - 1];
+    segUrls.push(buildMapsUrl(seg, origin));
+  }
+
+  const SEG_COLORS = ["#1a73e8", "#e67e22", "#2ecc71", "#9b59b6"];
+
+  const segButtons = segUrls.map((url, i) => {
+    const col      = SEG_COLORS[i % SEG_COLORS.length];
+    const from     = i * SEG_SIZE + 1;
+    const to       = Math.min((i + 1) * SEG_SIZE, routeStops.length);
+    const label    = numSegs > 1 ? "Part " + (i+1) + " of " + numSegs : "Open Full Route";
+    const range    = numSegs > 1 ? " (stops " + from + "\u2013" + to + ")" : "";
+    return '<a href="' + url + '" target="_blank" '
+      + 'style="display:inline-flex;align-items:center;gap:6px;background:' + col + ';color:#fff;'
+      + 'padding:9px 18px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:700">'
+      + '&#128205; ' + label
+      + '<span style="opacity:.7;font-weight:400;font-size:11px">' + range + '</span></a>';
+  }).join("\n    ");
+
+  const segNote = numSegs > 1
+    ? '<div style="margin-top:7px;font-size:10px;color:#888">&#9432;&nbsp; Each link covers up to 10 stops. Open in order &mdash; Part 2 starts exactly where Part 1 ends.</div>'
+    : '';
+
+  const rows = routeStops.map((st, i) => {
+    const v       = st.orders.reduce((s,o) => s + o.total_value, 0).toFixed(2);
+    const nums    = st.orders.map(o => o.order_number).join(", ");
+    const ck      = getCorridor(st.city, st.lat, st.lng), col = CORRIDORS[ck].color;
+    const isLast  = i === routeStops.length - 1;
+    const mapsUrl = "https://www.google.com/maps/search/?api=1&query=" + st.lat + "," + st.lng;
+    const segIdx  = Math.floor(i / SEG_SIZE);
+    const segCol  = SEG_COLORS[segIdx % SEG_COLORS.length];
+    const segBadge = numSegs > 1
+      ? ' <span style="background:' + segCol + '22;color:' + segCol + ';padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700">P' + (segIdx+1) + '</span>'
+      : '';
+    const rowBg = isLast ? ' style="background:#f0fff4"' : (i % 2 === 0 ? '' : ' style="background:#fafafa"');
+    return '<tr' + rowBg + '>'
+      + '<td style="font-size:11px;white-space:nowrap">' + (i+1) + (isLast ? ' \uD83C\uDFE0' : '') + segBadge + '</td>'
+      + '<td><span style="display:inline-block;width:16px;height:16px;border:2px solid #ccc;border-radius:3px"></span></td>'
+      + '<td><strong>' + st.customer_name + '</strong><br><span style="font-size:10px;color:#888">' + nums + '</span></td>'
+      + '<td>' + (st.city || '\u2014') + '</td>'
+      + '<td><a href="' + mapsUrl + '" target="_blank" style="color:#1a73e8;font-size:11px;text-decoration:none;white-space:nowrap">&#128205; Nav</a></td>'
+      + '<td style="font-family:monospace;font-size:11px"><strong>' + v + '</strong></td>'
+      + '<td><span style="background:' + col + '22;color:' + col + ';padding:1px 6px;border-radius:3px;font-size:10px">' + CORRIDORS[ck].name + '</span></td>'
+      + '</tr>';
+  }).join("");
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Tobeez Route Card</title>
+  <style>body{font-family:Arial,sans-serif;padding:20px;max-width:960px;margin:auto}h1{font-size:20px;margin-bottom:4px}
+  .meta{color:#555;font-size:12px;margin-bottom:8px;padding:10px;background:#f9f9f9;border-radius:4px;line-height:1.8}
+  .sched{display:flex;gap:24px;margin-bottom:16px;padding:10px 14px;background:#fff8e7;border-radius:4px;border-left:4px solid #f0a500;font-size:12px}
+  .sched div{display:flex;flex-direction:column;gap:2px}.sched strong{font-size:14px}
+  table{width:100%;border-collapse:collapse}th{background:#f0f0f0;padding:8px;text-align:left;font-size:11px;text-transform:uppercase;border-bottom:2px solid #ddd}
+  td{padding:8px;border-bottom:1px solid #eee;font-size:12px}
+  .hr td{background:#fff8e7;font-weight:bold}.hm td{background:#f0fff4;font-weight:bold}
+  @media print{body{padding:0}}</style></head><body>
+  <h1>&#128666; Tobeez &mdash; Route Card</h1>
+  <div class="meta">&#128197; <strong>${dateLabel}</strong> &nbsp;|&nbsp; &#128739; ${corrNames} &nbsp;|&nbsp; &#128205; ${routeStops.length} stops &nbsp;|&nbsp; ~${dist} km &nbsp;|&nbsp; ${val} MAD</div>
+  <div class="sched">
+    <div><strong>&#9733; 07:30</strong><span>Load &middot; Berrechid HUB</span></div>
+    <div><strong>&rarr; 08:00</strong><span>First delivery</span></div>
+    <div><strong>&#127968; ${etaHome}</strong><span>ETA Bouskoura</span></div>
+  </div>
+  <div style="margin-bottom:16px">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;font-weight:700;margin-bottom:8px">&#128205; Google Maps Route Links</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">${segButtons}</div>
+    ${segNote}
+  </div>
+  <table><tr><th>#</th><th>&check;</th><th>Customer</th><th>City</th><th>Navigate</th><th>Value MAD</th><th>Corridor</th></tr>
+  <tr class="hr"><td>&#9733;</td><td></td><td>Berrechid HUB (START &middot; 07:30)</td><td>Berrechid</td><td>&mdash;</td><td>&mdash;</td><td>HUB</td></tr>
+  ${rows}
+  <tr class="hm"><td>&#127968;</td><td></td><td>Return Home &mdash; Bouskoura</td><td>Bouskoura</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+  </table>
+  <div style="margin-top:16px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:8px">Tobeez Route Planner &middot; ${new Date().toLocaleString("fr-MA")}</div>
+  </body></html>`;
+  const blob=new Blob([html],{type:"text/html"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`Tobeez_Route_${df}.html`;a.click();
+  toast("Route card downloaded!");
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function clearAll(){
+  selectedKeys.clear();routeStops=[];isOptimized=false;allSelected=false;
+  document.querySelectorAll(".citem").forEach(el=>el.classList.remove("selected"));
+  document.querySelector(".sal-btn").textContent="Select All";
+  document.getElementById("sv-sel").textContent=0;
+  document.getElementById("optBtn").style.display="none";
+  document.getElementById("routePanel").style.display="none";
+  document.getElementById("schedbar").style.display="none";
+  document.getElementById("sv-dist").textContent="\u2014";
+  document.getElementById("sv-eta").textContent="\u2014";
+  document.getElementById("rstops").innerHTML=`<div class="empty"><div class="eico">&#128205;</div><p>Select corridors and click<br><strong>Optimize Selected</strong></p></div>`;
+  draw();
+}
+function switchTab(name,el){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".tabpane").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");document.getElementById("tab-"+name).classList.add("active");
+}
+function toast(msg){
+  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3500);
+}
+</script>
+</body>
+</html>
