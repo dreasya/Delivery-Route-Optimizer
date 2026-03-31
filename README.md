@@ -74,7 +74,7 @@ Planning time dropped from ~50 minutes to **under 5 minutes**.
 ## Technical Architecture
 
 ```
-Confidential*_planner.html          ← entire app in one file (~90KB)
+delivery-route-planner.html          ← entire app in one file (~90KB)
 │
 ├── CSS (dark UI, canvas map, responsive)
 ├── HTML (splash, sidebar, canvas, panels)
