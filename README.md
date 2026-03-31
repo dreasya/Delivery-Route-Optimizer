@@ -1,8 +1,8 @@
 # Confidential* Route Planner
 
-> **Internal logistics tool built for [Confidential*](https://github.com/dreasy) — a last-mile FMCG distribution startup operating in the Casablanca region.**
+> **Internal logistics tool built for [Confidential*]((https://github.com/dreasya)) — a last-mile FMCG distribution startup operating in the Casablanca region.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=flat-square&logo=github)]([https://dreasy.github.io/delivery-route-planner](https://github.com/dreasya/Delivery-Route-Optimizer/blob/main/delivery-route-planner.html))
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=flat-square&logo=github)]([https://dreasya.github.io/delivery-route-planner](https://github.com/dreasya/Delivery-Route-Optimizer/blob/main/delivery-route-planner.html))
 
 ---
 
@@ -137,7 +137,7 @@ delivery-route-planner.html          ← entire app in one file (~90KB)
 ## How to Use
 
 ### Option A — Live Demo
-→ [dreasy.github.io/delivery-route-planner](https://dreasy.github.io/delivery-route-planner)
+→ [dreasya.github.io/delivery-route-planner](https://dreasya.github.io/delivery-route-planner)
 
 ### Option B — Run Locally
 ```bash
@@ -198,4 +198,4 @@ MIT — free to use, adapt, and build on.
 
 ---
 
-*Built by [Mohamed Amin OUARGUI](https://github.com/dreasy) · Product & Ops Lead @ Confidential* · Berrechid, Morocco*
+*Built by [Mohamed Amin OUARGUI](https://github.com/dreasya) · Product & Ops Lead @ Confidential* · Berrechid, Morocco*
