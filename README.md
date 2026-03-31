@@ -1,8 +1,8 @@
-# Tobeez Route Planner
+# Confidential* Route Planner
 
-> **Internal logistics tool built for [Tobeez](https://github.com/yourusername) — a last-mile FMCG distribution startup operating in the Casablanca region.**
+> **Internal logistics tool built for [Confidential](https://github.com/dreasy) — a last-mile FMCG distribution startup operating in the Casablanca region.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=flat-square&logo=github)](https://dreasy.github.io/tobeez-route-planner)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=flat-square&logo=github)](https://dreasy.github.io/Confidential*-route-planner)
 [![Built With](https://img.shields.io/badge/Built%20With-Vanilla%20JS-yellow?style=flat-square)]()
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green?style=flat-square)]()
 [![Single File](https://img.shields.io/badge/App-Single%20HTML%20File-orange?style=flat-square)]()
@@ -11,7 +11,7 @@
 
 ## The Problem
 
-Tobeez delivers 20–30 FMCG orders per day across Casablanca. Every morning, the ops team had to:
+Confidential* delivers 20–30 FMCG orders per day across Casablanca. Every morning, the ops team had to:
 
 1. Manually scan yesterday's Odoo export to decide which orders to deliver
 2. Copy–paste addresses into Google Maps one by one
@@ -74,7 +74,7 @@ Planning time dropped from ~50 minutes to **under 5 minutes**.
 ## Technical Architecture
 
 ```
-tobeez_planner.html          ← entire app in one file (~90KB)
+Confidential*_planner.html          ← entire app in one file (~90KB)
 │
 ├── CSS (dark UI, canvas map, responsive)
 ├── HTML (splash, sidebar, canvas, panels)
@@ -140,18 +140,18 @@ tobeez_planner.html          ← entire app in one file (~90KB)
 ## How to Use
 
 ### Option A — Live Demo
-→ [yourusername.github.io/tobeez-route-planner](https://yourusername.github.io/tobeez-route-planner)
+→ [yourusername.github.io/Confidential*-route-planner](https://yourusername.github.io/Confidential*-route-planner)
 
 ### Option B — Run Locally
 ```bash
 # No install, no build step, no server needed
-git clone https://github.com/yourusername/tobeez-route-planner
-open tobeez_planner.html   # or just double-click it
+git clone https://github.com/yourusername/Confidential*-route-planner
+open Confidential*_planner.html   # or just double-click it
 ```
 
 ### Daily Workflow
 ```
-1. Open tobeez_planner.html
+1. Open Confidential*_planner.html
 2. Upload Odoo export (.xlsx or .csv)
 3. Set date filter → Apply
 4. Toggle ✓/✗ on orders (confirm / defer)
@@ -176,9 +176,9 @@ At 20–30 stops, 2-opt consistently finds near-optimal routes in under 100ms. O
 
 ---
 
-## About Tobeez
+## About Confidential*
 
-Tobeez is a last-mile FMCG distribution startup based in Casablanca. As **Product & Ops Lead**, I built this tool to eliminate manual planning and create a feedback loop between route data and ops decisions.
+Confidential* is a last-mile FMCG distribution startup based in Casablanca. As **Product & Ops Lead**, I built this tool to eliminate manual planning and create a feedback loop between route data and ops decisions.
 
 The metrics engine embedded in this tool was the first step toward a data-driven dispatch system — tracking planning time, route efficiency, and order value per zone over time.
 
@@ -201,4 +201,4 @@ MIT — free to use, adapt, and build on.
 
 ---
 
-*Built by [Mohamed Amin OUARGUI](https://github.com/dreasy) · Product & Ops Lead @ Tobeez · Berrechid, Morocco*
+*Built by [Mohamed Amin OUARGUI](https://github.com/dreasy) · Product & Ops Lead @ Confidential* · Berrechid, Morocco*
